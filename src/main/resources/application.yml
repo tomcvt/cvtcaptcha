@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: cvtcaptcha
+  
+  datasource:
+    url: jdbc:postgresql://{DB_HOST}:{DB_PORT}/{DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration-ms: 3600000  # 1 hour in milliseconds
+
+
+
+
+logging:
+  level:
+    root: WARN
+    org.springframework.security: DEBUG
+    com.tomcvt.cvtcaptcha: INFO
+    org.hibernate.SQL: DEBUG
+
+  file:
+    name: logs/app.log
+
+  pattern:
+    file: "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+    console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"

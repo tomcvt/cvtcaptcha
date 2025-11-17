@@ -1,0 +1,41 @@
+package com.tomcvt.cvtcaptcha.auth;
+
+import java.io.IOException;
+import java.security.Security;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Component
+public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
+
+    public AnonUserAuthenticationFilter() {
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            String xff = request.getHeader("X-Forwarded-For");
+            String ipAddress;
+            if (xff != null && !xff.isEmpty()) {
+            ipAddress = request.getHeader("X-Forwarded-For").split(",")[0].trim();
+            } else {
+                ipAddress = request.getRemoteAddr();
+            }
+            SecureUserDetails anonUserDetails = new SecureUserDetails(false, null, ipAddress);
+            var authToken = new UsernamePasswordAuthenticationToken(
+                    anonUserDetails, null, anonUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        }
+        filterChain.doFilter(request, response);
+    }
+    
+}
