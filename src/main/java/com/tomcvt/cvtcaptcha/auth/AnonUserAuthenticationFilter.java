@@ -1,7 +1,6 @@
 package com.tomcvt.cvtcaptcha.auth;
 
 import java.io.IOException;
-import java.security.Security;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;

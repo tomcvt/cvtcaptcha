@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 .env
 logs/
+application-dev.yml
 
 ### STS ###
 .apt_generated

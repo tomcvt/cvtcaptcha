@@ -12,13 +12,11 @@ import com.tomcvt.cvtcaptcha.auth.SecureUserDetailsService;
 @Configuration
 public class AuthConfig {
     private final PasswordEncoder passwordEncoder;
-    private final SecureUserDetailsService userDetailsService;
 
-    public AuthConfig(PasswordEncoder passwordEncoder, SecureUserDetailsService userDetailsService) {
+
+    public AuthConfig(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
-        this.userDetailsService = userDetailsService;
     }
-
 
     @Bean 
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -26,7 +24,7 @@ public class AuthConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
+    public DaoAuthenticationProvider daoAuthenticationProvider(SecureUserDetailsService userDetailsService) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;

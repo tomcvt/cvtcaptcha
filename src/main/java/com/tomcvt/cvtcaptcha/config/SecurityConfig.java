@@ -1,7 +1,5 @@
 package com.tomcvt.cvtcaptcha.config;
 
-import java.security.Security;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,22 +17,19 @@ import com.tomcvt.cvtcaptcha.auth.JwtAuthenticationFilter;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
-    private final AuthenticationManager authenticationManager;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AnonUserAuthenticationFilter anonUserAuthenticationFilter;
 
     public SecurityConfig(
-            AuthenticationManager authenticationManager,
             JwtAuthenticationFilter jwtAuthenticationFilter, 
             AnonUserAuthenticationFilter anonUserAuthenticationFilter) {
-        this.authenticationManager = authenticationManager;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.anonUserAuthenticationFilter = anonUserAuthenticationFilter;
     }
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
@@ -44,9 +39,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
+            .authenticationManager(authenticationManager)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(anonUserAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .authenticationManager(authenticationManager);
+            .addFilterAfter(anonUserAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

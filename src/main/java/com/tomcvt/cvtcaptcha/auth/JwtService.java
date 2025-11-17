@@ -19,7 +19,7 @@ public class JwtService {
     private final SecretKey key;
     private final JwtParser jwtParser;
 
-    public JwtService(@Value("${jwt.secret}") String SECRET_KEY) {
+    public JwtService(@Value("${spring.security.jwt.secret-key}") String SECRET_KEY) {
         //this.SECRET_KEY = SECRET_KEY;
         this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
         this.jwtParser = Jwts.parser().verifyWith(key).build();
