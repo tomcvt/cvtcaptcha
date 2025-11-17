@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +15,12 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-    private final String SECRET_KEY = "your-256-bit-secret-11111111111111111111111111111111111111111111111111111111111111";
+    //private final String SECRET_KEY;
     private final SecretKey key;
     private final JwtParser jwtParser;
 
-    public JwtService() {
+    public JwtService(@Value("${jwt.secret}") String SECRET_KEY) {
+        //this.SECRET_KEY = SECRET_KEY;
         this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
         this.jwtParser = Jwts.parser().verifyWith(key).build();
     }
