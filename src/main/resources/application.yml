@@ -22,8 +22,22 @@ spring:
       secret-key: ${JWT_SECRET_KEY}
       expiration-ms: 3600000  # 1 hour in milliseconds
 
+com:
+  tomcvt:
+    cvtcaptcha:
+      request:
+        rate-limit:
+          max-requests: 50
+          time-window-ms: 60000 # 1 minute in milliseconds
+      captcha:
+        rate-limit:
+          max-requests: 100
+          time-window-ms: 3600000 # 1 hour in milliseconds
+        expiration-seconds: 120 
+        max-attempts: 3
 
-
+app:
+  domain: https://cvtcaptcha.example.com
 
 logging:
   level:

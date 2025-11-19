@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.tomcvt.cvtcaptcha.auth.AnonUserAuthenticationFilter;
@@ -19,6 +20,10 @@ import com.tomcvt.cvtcaptcha.auth.JwtAuthenticationFilter;
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AnonUserAuthenticationFilter anonUserAuthenticationFilter;
+    private final String[] WHITELIST = {
+        "/api/auth/**",
+        "/error"
+    };
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter, 
@@ -36,12 +41,13 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(WHITELIST).permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationManager(authenticationManager)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(anonUserAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(anonUserAuthenticationFilter, AnonymousAuthenticationFilter.class)
+            .anonymous(anonymous -> anonymous.disable());
 
         return http.build();
     }

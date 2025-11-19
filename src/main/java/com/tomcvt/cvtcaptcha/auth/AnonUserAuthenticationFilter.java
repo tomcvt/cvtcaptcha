@@ -7,6 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.tomcvt.cvtcaptcha.network.GlobalRateLimiter;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,13 +16,17 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
+    private final GlobalRateLimiter rateLimiter;
 
-    public AnonUserAuthenticationFilter() {
+    public AnonUserAuthenticationFilter(GlobalRateLimiter rateLimiter) {
+        this.rateLimiter = rateLimiter;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("AnonUserAuthenticationFilter invoked");
+        System.out.println("Current Authentication: " + SecurityContextHolder.getContext().getAuthentication());
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             String xff = request.getHeader("X-Forwarded-For");
             String ipAddress;
@@ -33,6 +39,12 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             var authToken = new UsernamePasswordAuthenticationToken(
                     anonUserDetails, null, anonUserDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                rateLimiter.checkRateLimit(ipAddress);
+            } catch (Exception e) {
+                response.sendError(429, "Rate limit exceeded");
+                return;
+            }
         }
         filterChain.doFilter(request, response);
     }

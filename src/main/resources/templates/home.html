@@ -8,5 +8,27 @@
 	<h1 th:text="${title}">Welcome to CVT Captcha!</h1>
 	<p th:text="${message}">This is your home page.</p>
     <p th:text="${userIp}"></p>
+
+    <button id="captchaButton">Get Captcha</button>
+    <div id="captchaData"></div>
+    <script>
+        document.getElementById('captchaButton').addEventListener('click', function() {
+            fetch('/api/captcha/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    requestId: 'unique-request-id',
+                    type: 'CLICK_IN_ORDER'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('captchaData').innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
 </body>
 </html>
