@@ -1,5 +1,6 @@
 package com.tomcvt.cvtcaptcha.service;
 
+import java.io.File;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class CaptchaService {
 
     public CaptchaData createCaptcha(UUID requestId, CaptchaType type, String userIp) {
         CaptchaData captchaData = new CaptchaData();
+        requestId = captchaData.getRequestId();
         captchaData.setType(type);
         captchaData.setUserIp(userIp);
         captchaData.setCreatedAt(System.currentTimeMillis());
@@ -35,8 +37,9 @@ public class CaptchaService {
         if (type == CaptchaType.CLICK_IN_ORDER) {
             String solution = solutionGenerator.generateCIOSolution();
             captchaData.setSolution(solution);
-            //String imageData = captchaImageGenerator.generateCIOImage(solution);
-            //captchaData.setData(imageData);
+            File imageFile = captchaImageGenerator.generateEmojiCaptchaImage(requestId, solution);
+            String imageData = "/captcha-images/" + imageFile.getName();
+            captchaData.setData(imageData);
             float clickRadius = 0.1f;
             String parameters = null;
             try {
@@ -47,6 +50,15 @@ public class CaptchaService {
             }
             captchaData.setParameters(parameters); //parameters to solve resolver
         }
+        System.out.println("Solution for captcha " + requestId + ": " + captchaData.getSolution());
         return captchaDataRepository.save(captchaData);
+    }
+
+    public boolean verifyCaptchaSolution(UUID requestId, CaptchaType type, Object solution) {
+        //TODO implement
+
+        System.out.println("Verifying captcha solution for requestId: " + requestId + ", type: " + type + ", solution: " + solution);
+
+        return true;
     }
 }

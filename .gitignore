@@ -6,6 +6,7 @@ target/
 .env
 logs/
 application-dev.yml
+storage/
 
 ### STS ###
 .apt_generated

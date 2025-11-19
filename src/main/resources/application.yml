@@ -38,6 +38,7 @@ com:
 
 app:
   domain: https://cvtcaptcha.example.com
+  captcha-dir: storage
 
 logging:
   level:

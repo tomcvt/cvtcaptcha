@@ -29,9 +29,13 @@ public class SolutionGenerator {
         scrambleList(points);
         StringBuilder sb = new StringBuilder();
         for (Point point : points) {
-            sb.append(String.format("%.3f,%.3f;", point.x(), point.y()));
+            sb.append(String.valueOf(point.x()).substring(0, 5));
+            sb.append(",");
+            sb.append(String.valueOf(point.y()).substring(0, 5));
+            sb.append(";");
         }
         sb.setLength(sb.length() - 1); 
+        System.out.println("Generated CIO solution: " + sb.toString());
         return sb.toString();
     }
 
