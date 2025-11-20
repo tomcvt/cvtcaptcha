@@ -14,7 +14,8 @@ const CaptchaModule = {
     Captcha: function(config) {
         let captchaData = null;
         let solved = null;
-        let userSolution = null;
+        let userSolution = "";
+        let markers = [];
         let doOnSuccess = null;
         let requestId = "00000000-0000-0000-0000-000000000000";
         if (!config || !config.type) {
@@ -57,6 +58,36 @@ const CaptchaModule = {
             doOnSuccess = config.onSuccess;
         }
 
+        const img = document.createElement('img');
+        img.width = 400;
+        img.height = 300;
+
+        document.addEventListener('click', function(event) {
+            if (img && event.target === img && config.type === 'CLICK_IN_ORDER') {
+                const rect = img.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const index = markers.length + 1;
+                const marker = createMarker(event.clientX, event.clientY, index);
+                img.parentElement.appendChild(marker);
+                markers.push({ x: x, y: y });
+                const relX = x / img.width;
+                const relY = y / img.height;
+                userSolution += relX.toFixed(4) + ',' + relY.toFixed(4) + ';';
+                console.log('Marker added at:', relX.toFixed(4), relY.toFixed(4));
+            }
+        });
+
+        function resetCaptcha() {
+            markers.forEach(marker => {
+                if (marker.element && marker.element.parentElement) {
+                    marker.element.parentElement.removeChild(marker.element);
+                }
+            });
+            markers = [];
+            userSolution = "";
+        }
+
         //Return an object with methods to interact with the captcha
         return {
             render: async function(containerSelector) {
@@ -69,7 +100,7 @@ const CaptchaModule = {
                 if (config.type === 'CLICK_IN_ORDER') {
                     //For now log the solution
                     console.log('Captcha Solution (for testing):', captchaData.imageUrl);
-                    const img = document.createElement('img');
+                    //const img = document.createElement('img');
                     img.src = captchaData.imageUrl;
                     container.appendChild(img);
                     //Additional logic to handle click in order can be added here
@@ -78,7 +109,6 @@ const CaptchaModule = {
                 submitButton.textContent = 'Submit Captcha';
                 submitButton.onclick = async () => {
                     //For testing, we use a dummy solution
-                    userSolution = [captchaData.data]; //In real case, gather user input
                     const isSolved = await verifyCaptcha(userSolution);
                     if (isSolved) {
                         alert('Captcha solved successfully!');
@@ -88,6 +118,7 @@ const CaptchaModule = {
                     } else {
                         alert('Captcha solution incorrect. Please try again.');
                     }
+                    resetCaptcha();
                 };
                 container.appendChild(submitButton);
             },
@@ -99,6 +130,24 @@ const CaptchaModule = {
             }
         };
     }
+}
+
+
+function createMarker(x, y, index) {
+    const marker = document.createElement('div');
+    marker.style.position = 'absolute';
+    marker.style.left = (x - 10) + 'px';
+    marker.style.top = (y - 10) + 'px';
+    marker.style.width = '20px';
+    marker.style.height = '20px';
+    marker.style.backgroundColor = 'red';
+    marker.style.borderRadius = '50%';
+    marker.style.color = 'white';
+    marker.style.display = 'flex';
+    marker.style.alignItems = 'center';
+    marker.style.justifyContent = 'center';
+    marker.textContent = index;
+    return marker;
 }
 
 //Example usage:

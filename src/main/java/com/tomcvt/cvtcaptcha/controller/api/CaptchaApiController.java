@@ -50,6 +50,8 @@ public class CaptchaApiController {
     public ResponseEntity<?> verifyCaptcha(@RequestBody SolutionResponse solutionResponse) {
         CaptchaType type = parseCaptchaType(solutionResponse.type());
         //TODO add solution tries limit
+        System.out.println("Verifying captcha solution for requestId: " + solutionResponse.requestId());
+        System.out.println("Solution: " + solutionResponse.solution());
         if(captchaService.verifyCaptchaSolution(solutionResponse.requestId(), type, solutionResponse.solution())) {
             return ResponseEntity.ok(new VerificationResponse(solutionResponse.requestId(), true));
         }

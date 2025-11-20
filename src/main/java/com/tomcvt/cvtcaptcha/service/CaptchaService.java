@@ -14,14 +14,17 @@ import com.tomcvt.cvtcaptcha.repository.CaptchaDataRepository;
 @Service
 public class CaptchaService {
     private final SolutionGenerator solutionGenerator;
+    private final SolutionVerificationService solutionVerificationService;
     private final CaptchaDataRepository captchaDataRepository;
     private final CaptchaImageGenerator captchaImageGenerator;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    
-    public CaptchaService(SolutionGenerator solutionGenerator, 
-                          CaptchaDataRepository captchaDataRepository,
-                          CaptchaImageGenerator captchaImageGenerator) {
+
+    public CaptchaService(SolutionGenerator solutionGenerator,
+            SolutionVerificationService solutionVerificationService,
+            CaptchaDataRepository captchaDataRepository,
+            CaptchaImageGenerator captchaImageGenerator) {
         this.solutionGenerator = solutionGenerator;
+        this.solutionVerificationService = solutionVerificationService;
         this.captchaDataRepository = captchaDataRepository;
         this.captchaImageGenerator = captchaImageGenerator;
     }
@@ -32,32 +35,40 @@ public class CaptchaService {
         captchaData.setType(type);
         captchaData.setUserIp(userIp);
         captchaData.setCreatedAt(System.currentTimeMillis());
-        captchaData.setExpiresAt(System.currentTimeMillis() + 5 * 60 * 1000); 
-        //TODO make switch here
+        captchaData.setExpiresAt(System.currentTimeMillis() + 5 * 60 * 1000);
+        // TODO make switch here
         if (type == CaptchaType.CLICK_IN_ORDER) {
             String solution = solutionGenerator.generateCIOSolution();
             captchaData.setSolution(solution);
             File imageFile = captchaImageGenerator.generateEmojiCaptchaImage(requestId, solution);
             String imageData = "/captcha-images/" + imageFile.getName();
             captchaData.setData(imageData);
-            float clickRadius = 0.1f;
+            float clickRadius = 0.1f; // TODO refactor to pixel depending on config and emote size
             String parameters = null;
             try {
                 parameters = objectMapper.writeValueAsString(new CIOParameters(clickRadius));
             } catch (Exception e) {
-                //TODO logginh and proper handling
+                // TODO logginh and proper handling
                 e.printStackTrace();
             }
-            captchaData.setParameters(parameters); //parameters to solve resolver
+            captchaData.setParameters(parameters); // parameters to solve resolver
         }
         System.out.println("Solution for captcha " + requestId + ": " + captchaData.getSolution());
         return captchaDataRepository.save(captchaData);
     }
 
-    public boolean verifyCaptchaSolution(UUID requestId, CaptchaType type, Object solution) {
-        //TODO implement
+    public boolean verifyCaptchaSolution(UUID requestId, CaptchaType type, String solution) {
+        // TODO implement
+        CaptchaData captchaData = captchaDataRepository.findByRequestId(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("Captcha not found"));
+        // TODO switch later
+        if (type == CaptchaType.CLICK_IN_ORDER) {
+            // TODO use SolutionVerificationService
+            return solutionVerificationService.verifyCIOSolution(captchaData.getSolution(), solution);
+        }
 
-        System.out.println("Verifying captcha solution for requestId: " + requestId + ", type: " + type + ", solution: " + solution);
+        System.out.println("Verifying captcha solution for requestId: " + requestId + ", type: " + type + ", solution: "
+                + solution);
 
         return true;
     }

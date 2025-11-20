@@ -22,8 +22,6 @@ public class SolutionVerificationService {
         this.radius = radius;
     }
 
-
-
     public boolean verifyCIOSolution(String correctSolution, String userSolution) {
         List<Point> correctPoints = SolutionParser.parseCIOSolution(correctSolution);
         List<Point> userPoints = SolutionParser.parseCIOSolution(userSolution);
