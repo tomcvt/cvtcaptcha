@@ -39,6 +39,10 @@ com:
 app:
   domain: https://cvtcaptcha.example.com
   captcha-dir: storage
+  image:
+    width: 400
+    height: 300
+    emote-r: 36
 
 logging:
   level:

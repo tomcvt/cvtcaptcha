@@ -12,8 +12,8 @@ import com.tomcvt.cvtcaptcha.dtos.Point;
 public class SolutionGenerator {
     private final List<Point> offsets = List.of(
         new Point(0.1f, 0.1f),
-        new Point(0.6f, 0.6f),
-        new Point(0.1f, 0.6f),
+        new Point(0.6f, 0.55f),
+        new Point(0.1f, 0.55f),
         new Point(0.6f, 0.1f)
     );
     private final Random random = new Random();
@@ -23,7 +23,7 @@ public class SolutionGenerator {
         List<Point> points = new ArrayList<>();
         for (Point offset : offsets) {
             float x = random.nextFloat() * 0.3f + offset.x();
-            float y = random.nextFloat() * 0.3f + offset.y();
+            float y = random.nextFloat() * 0.25f + offset.y();
             points.add(new Point(x, y));
         }
         scrambleList(points);
