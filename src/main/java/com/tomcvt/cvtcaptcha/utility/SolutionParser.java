@@ -11,9 +11,7 @@ public class SolutionParser {
         for (String part : parts) {
             String[] coords = part.split(",");
             float x = Float.parseFloat(coords[0]);
-            System.out.println("Parsed x: " + x);
             float y = Float.parseFloat(coords[1]);
-            System.out.println("Parsed y: " + y);
             points.add(new Point(x, y));
         }
         return points;

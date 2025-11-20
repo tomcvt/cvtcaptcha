@@ -11,8 +11,9 @@ usage: CaptchaModule.Captcha({
 
 
 const CaptchaModule = {
-    Captcha: function(config) {
+    Captcha: function (config) {
         let captchaData = null;
+        let containerElement = null;
         let solved = null;
         let userSolution = "";
         let markers = [];
@@ -58,25 +59,32 @@ const CaptchaModule = {
             doOnSuccess = config.onSuccess;
         }
 
+        const imgWrapper = document.createElement('div');
+        imgWrapper.style.position = 'relative';
+        imgWrapper.style.width = '400px';
+        imgWrapper.style.height = '300px';
         const img = document.createElement('img');
         img.width = 400;
         img.height = 300;
 
-        document.addEventListener('click', function(event) {
-            if (img && event.target === img && config.type === 'CLICK_IN_ORDER') {
-                const rect = img.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                const index = markers.length + 1;
-                const marker = createMarker(event.clientX, event.clientY, index);
-                img.parentElement.appendChild(marker);
-                markers.push({ x: x, y: y });
-                const relX = x / img.width;
-                const relY = y / img.height;
-                userSolution += relX.toFixed(4) + ',' + relY.toFixed(4) + ';';
-                console.log('Marker added at:', relX.toFixed(4), relY.toFixed(4));
-            }
-        });
+
+        // if CLICK_IN_ORDER, handle clicks
+        if (config.type === 'CLICK_IN_ORDER') {
+            document.addEventListener('click', function (event) {
+                if (img && event.target === img && config.type === 'CLICK_IN_ORDER') {
+                    const rect = imgWrapper.getBoundingClientRect();
+                    const x = event.clientX - rect.left;
+                    const y = event.clientY - rect.top;
+                    const index = markers.length + 1;
+                    const marker = createMarker(x, y, index);
+                    imgWrapper.appendChild(marker);
+                    markers.push({ x: x, y: y });
+                    const relX = x / img.width;
+                    const relY = y / img.height;
+                    userSolution += relX.toFixed(4) + ',' + relY.toFixed(4) + ';';
+                }
+            });
+        }
 
         function resetCaptcha() {
             markers.forEach(marker => {
@@ -90,9 +98,22 @@ const CaptchaModule = {
 
         //Return an object with methods to interact with the captcha
         return {
-            render: async function(containerSelector) {
+            renderInto: async function (containerSelector) {
                 await fetchCaptcha;
                 const container = document.querySelector(containerSelector);
+                container.style.width = (img.width + 10) + 'px';
+                container.style.height = (img.height + 60) + 'px';
+                const moduleBox = document.createElement('div');
+                moduleBox.style.border = '1px solid #ccc';
+                moduleBox.style.padding = '5px';
+                moduleBox.style.position = 'relative';
+                moduleBox.style.width = img.width + 'px';
+                moduleBox.style.height = (img.height + 50) + 'px';
+                moduleBox.style.display = 'flex';
+                moduleBox.style.flexDirection = 'column';
+                moduleBox.style.alignItems = 'center';
+                moduleBox.style.justifyContent = 'center';
+                container.appendChild(moduleBox);
                 if (!container) {
                     throw new Error('Container not found for selector: ' + containerSelector);
                 }
@@ -100,9 +121,9 @@ const CaptchaModule = {
                 if (config.type === 'CLICK_IN_ORDER') {
                     //For now log the solution
                     console.log('Captcha Solution (for testing):', captchaData.imageUrl);
-                    //const img = document.createElement('img');
                     img.src = captchaData.imageUrl;
-                    container.appendChild(img);
+                    imgWrapper.appendChild(img);
+                    moduleBox.appendChild(imgWrapper);
                     //Additional logic to handle click in order can be added here
                 }
                 const submitButton = document.createElement('button');
@@ -113,16 +134,16 @@ const CaptchaModule = {
                     if (isSolved) {
                         alert('Captcha solved successfully!');
                         if (doOnSuccess) {
-                            doOnSuccess({ requestId: requestId, type: config.type, solution: userSolution });
+                            doOnSuccess({ requestId: requestId, type: config.type, solution: userSolution }, );
                         }
                     } else {
                         alert('Captcha solution incorrect. Please try again.');
                     }
                     resetCaptcha();
                 };
-                container.appendChild(submitButton);
+                moduleBox.appendChild(submitButton);
             },
-            isSolved: function() {
+            isSolved: function () {
                 if (solved !== null) {
                     return solved;
                 }
