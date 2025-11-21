@@ -1,5 +1,7 @@
 package com.tomcvt.cvtcaptcha.controller.api;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,7 @@ public class CaptchaApiController {
     private final CaptchaService captchaService;
     private final CaptchaRateLimiter captchaRateLimiter;
     private final CaptchaTokenService captchaTokenService;
+    private final List<String> unlimitedUsers = List.of("ROLE_USER", "ROLE_ADMIN");
 
     public CaptchaApiController(CaptchaService captchaService, CaptchaRateLimiter captchaRateLimiter, 
                                 CaptchaTokenService captchaTokenService
@@ -40,6 +43,9 @@ public class CaptchaApiController {
         if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ANON"))) {
             captchaRateLimiter.checkAndIncrementAnonymousLimit(userDetails.getIp());
             captcha = captchaService.createCaptcha(captchaRequest.requestId(), type, userDetails.getIp());
+        }
+        if (userDetails.getAuthorities().stream().anyMatch(auth -> unlimitedUsers.contains(auth.getAuthority()))) {
+            captcha = captchaService.createCaptcha(captchaRequest.requestId(), type, "UNLIMITED_USER");
         }
         if (captcha == null) {
             return ResponseEntity.status(500).body("Captcha creation failed");
