@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.tomcvt.cvtcaptcha.exceptions.InvalidTokenException;
 import com.tomcvt.cvtcaptcha.exceptions.WrongTypeException;
 
 @ControllerAdvice
@@ -17,5 +18,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleWrongTypeException(WrongTypeException ex) {
         log.warn("WrongTypeException: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<String> handleInvalidTokenException(InvalidTokenException ex) {
+        log.warn("InvalidTokenException: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 }

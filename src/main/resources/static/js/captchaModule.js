@@ -13,7 +13,7 @@ usage: CaptchaModule.Captcha({
 const CaptchaModule = {
     Captcha: function (config) {
         let captchaData = null;
-        let containerElement = null;
+        let cvtCaptchaToken = null;
         let solved = null;
         let userSolution = "";
         let markers = [];
@@ -40,7 +40,7 @@ const CaptchaModule = {
         })();
 
         const verifyCaptcha = async (solution) => {
-            const response = await fetch('/api/captcha/verify', {
+            const response = await fetch('/api/captcha/solve', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -48,11 +48,11 @@ const CaptchaModule = {
                 body: JSON.stringify({ requestId: requestId, type: config.type, solution: solution })
             });
             if (!response.ok) {
-                throw new Error('Failed to verify captcha solution');
+                throw new Error(await response.text());
             }
             const result = await response.json();
-            solved = result.solved;
-            return solved;
+            cvtCaptchaToken = result.cvtCaptchaToken;
+            return true;
         };
 
         if (config.onSuccess && typeof config.onSuccess === 'function') {
@@ -129,12 +129,12 @@ const CaptchaModule = {
                 const submitButton = document.createElement('button');
                 submitButton.textContent = 'Submit Captcha';
                 submitButton.onclick = async () => {
-                    //For testing, we use a dummy solution
+                    
                     const isSolved = await verifyCaptcha(userSolution);
                     if (isSolved) {
                         alert('Captcha solved successfully!');
                         if (doOnSuccess) {
-                            doOnSuccess({ requestId: requestId, type: config.type, solution: userSolution }, );
+                            doOnSuccess({ requestId: requestId, type: config.type, solution: userSolution }, cvtCaptchaToken);
                         }
                     } else {
                         alert('Captcha solution incorrect. Please try again.');

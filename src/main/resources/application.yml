@@ -20,21 +20,23 @@ spring:
   security:
     jwt:
       secret-key: ${JWT_SECRET_KEY}
-      expiration-ms: 3600000  # 1 hour in milliseconds
-
+      expiration-ms: 3600000
 com:
   tomcvt:
     cvtcaptcha:
       request:
         rate-limit:
           max-requests: 50
-          time-window-ms: 60000 # 1 minute in milliseconds
+          time-window-ms: 60000
       captcha:
         rate-limit:
           max-requests: 100
-          time-window-ms: 3600000 # 1 hour in milliseconds
+          time-window-ms: 3600000
         expiration-seconds: 120 
         max-attempts: 3
+    cvt-token:
+      secret: ${CVT_TOKEN_SECRET}
+      expiration-ms: 600000
 
 app:
   domain: https://cvtcaptcha.example.com
