@@ -40,7 +40,7 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
                     anonUserDetails, null, anonUserDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);
             try {
-                rateLimiter.checkRateLimit(ipAddress);
+                rateLimiter.checkRateLimitAndIncrement(ipAddress);
             } catch (Exception e) {
                 response.sendError(429, "Rate limit exceeded");
                 return;

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="login page">
+    <meta name="author" content="tomcvtdev">
+    <title>Please sign in</title>
+    <link href="css/main.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="content">
+    <form class="login-form" id="login-form">
+            <h2>Please sign in</h2>
+            <div id="login-alert" class="alert alert-danger" role="alert" style="display: none;">Invalid credentials</div>
+            <div id="logout-alert" class="alert alert-success" role="alert" style="display: none;">Successfully logged out</div>
+            <p>
+                <label for="username" class="screenreader">Username</label>
+                <input type="text" id="username" name="username" placeholder="Username" required autofocus>
+            </p>
+            <p>
+                <label for="password" class="screenreader">Password</label>
+                <input type="password" id="password" name="password" placeholder="Password" required>
+            </p>
+            <button type="submit" class="btn btn-primary">Sign in</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/register'">Registration</button>
+        </form>
+    </div>
+    <script src="/js/login.js"></script>
+</body>
+
+</html>

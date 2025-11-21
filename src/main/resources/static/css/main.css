@@ -1,0 +1,244 @@
+:root {
+    /* Colors */
+    --color-bg: #e3e3e6;
+    --color-text: #333;
+    --color-heading: #2c3e50;
+    --color-subheading: #34495e;
+    --color-error: #e74c3c;
+    --color-success: #27ae60;
+    --color-danger: #c0392b;
+
+    --color-primary: #3498db;
+    --color-primary-hover: #2980b9;
+    --color-primary-active: #1c5980;
+
+    /* Shadows */
+    --shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.12);
+
+    /* Radius */
+    --radius-sm: 5px;
+    --radius-md: 10px;
+
+    /* Spacing */
+    --space-xs: 8px;
+    --space-sm: 12px;
+    --space-md: 20px;
+    --space-lg: 30px;
+    --space-xl: 50px;
+
+    /* Typography */
+    --font-main: 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    font-family: var(--font-main);
+    background: var(--color-bg);
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+.content {
+    max-width: 1200px;
+    margin: var(--space-xl) auto;
+    padding: var(--space-md);
+}
+
+.container {
+    max-width: 800px;
+    margin: var(--space-xl) auto;
+    padding: var(--space-md);
+}
+
+h1, h2 {
+    text-align: center;
+    color: var(--color-heading);
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: var(--space-sm);
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 2rem;
+}
+
+.card {
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 25px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    margin-bottom: var(--space-md);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Fields */
+.field {
+    margin-bottom: var(--space-sm);
+    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+    background: #f9fafb;
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: space-between;
+    /* flex-wrap: wrap; */
+}
+
+@media (max-width: 700px) {
+    .field, .summary-field {
+        flex-direction: column !important;
+        align-items: stretch;
+    }
+    .field > div, .summary-field > div {
+        margin-bottom: var(--space-xs);
+    }
+}
+
+
+.field strong {
+    color: var(--color-subheading);
+}
+
+/* Alerts */
+.alert {
+    padding: 0.75rem 1rem;
+    margin: var(--space-md) auto;
+    line-height: 1.25;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+    border-width: 1px;
+    border-style: solid;
+    text-align: center;
+}
+
+.alert-error,
+.alert.alert-danger {
+    color: #6b1922;
+    background-color: #f7d5d7;
+    border: 1px solid #e38e96;
+}
+
+.alert.alert-success {
+    color: #145222;
+    background-color: #d1f0d9;
+    border: 1px solid #87e49c;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s ease;
+    width: 100%;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-hover);
+}
+
+.btn-primary:active {
+    background: var(--color-primary-active);
+}
+
+.btn-secondary {
+    background: var(--color-primary);
+    color: #fff;
+    margin-top: var(--space-md);
+}
+
+.btn-small {
+    padding: .25rem .5rem;
+    font-size: .875rem;
+}
+
+.btn-flex1 {
+    width: auto !important;
+    flex: 1;
+}
+
+/* Utility classes */
+.center {
+    text-align: center;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.v-middle {
+    vertical-align: middle;
+}
+
+.screenreader {
+    position: absolute;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    width: 1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: var(--space-lg);
+    border-collapse: collapse;
+}
+
+.table-striped th, td {
+    padding: var(--space-sm);
+}
+
+.table-striped tr:nth-of-type(2n + 1) {
+    background-color: #e1e1e1;
+}
+
+tr.v-middle > td {
+    vertical-align: middle;
+}
+
+/* Forms */
+input[type="text"],
+input[type="password"] {
+    height: auto;
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border-radius: var(--radius-sm);
+    border: 1px solid #ccc;
+}
+
+.login-form,
+.logout-form,
+.register-form,
+.default-form {
+    padding: 0 15px 15px 15px;
+    margin: 0 auto var(--space-lg) auto;
+    box-sizing: border-box;
+}
+
+.login-form,
+.logout-form,
+.register-form {
+    max-width: 400px;
+}

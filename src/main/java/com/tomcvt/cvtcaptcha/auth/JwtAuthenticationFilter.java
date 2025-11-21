@@ -51,6 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        System.out.println("JWT Token found: " + token);
 
         String username = jwtService.extractUsername(token);
 

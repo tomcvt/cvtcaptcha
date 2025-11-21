@@ -19,7 +19,19 @@ public class GlobalRateLimiter {
         this.maxRequests = maxRequests;
     }
 
-    public void checkRateLimit(String key) throws RateLimitExceededException {
+    public int getRemainingRequests(String key) {
+        RequestCounter counter = requestCounts.get(key);
+        if (counter == null) {
+            return maxRequests;
+        }
+        long currentTimeMillis = System.currentTimeMillis();
+        if (currentTimeMillis - counter.getWindowStartMillis() > resetMilillis) {
+            return maxRequests;
+        }
+        return Math.max(0, maxRequests - counter.getCount());
+    }
+
+    public void checkRateLimitAndIncrement(String key) throws RateLimitExceededException {
         long currentTimeMillis = System.currentTimeMillis();
         requestCounts.compute(key, (k, counter) -> {
             if (counter == null) {

@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -15,12 +17,11 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-    //private final String SECRET_KEY;
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
     private final SecretKey key;
     private final JwtParser jwtParser;
 
     public JwtService(@Value("${spring.security.jwt.secret-key}") String SECRET_KEY) {
-        //this.SECRET_KEY = SECRET_KEY;
         this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
         this.jwtParser = Jwts.parser().verifyWith(key).build();
     }
@@ -54,8 +55,9 @@ public class JwtService {
         try {
             return jwtParser.parseSignedClaims(token);
         } catch (JwtException e) {
-            throw new InvalidTokenException("Invalid JWT token", e);
+            log.error("Invalid JWT token: {}", e.getMessage());
         }
+        throw new InvalidTokenException("Invalid JWT token");
     }
 
 }
