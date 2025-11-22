@@ -3,11 +3,14 @@ package com.tomcvt.cvtcaptcha.service;
 import java.io.File;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Cleanup;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomcvt.cvtcaptcha.dtos.CIOParameters;
 import com.tomcvt.cvtcaptcha.enums.CaptchaType;
+import com.tomcvt.cvtcaptcha.exceptions.ExpiredCaptchaException;
 import com.tomcvt.cvtcaptcha.model.CaptchaData;
 import com.tomcvt.cvtcaptcha.repository.CaptchaDataRepository;
 
@@ -17,16 +20,22 @@ public class CaptchaService {
     private final SolutionVerificationService solutionVerificationService;
     private final CaptchaDataRepository captchaDataRepository;
     private final CaptchaImageGenerator captchaImageGenerator;
+    private final CleanupService cleanupService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final int captchaExpirationMillis;
 
     public CaptchaService(SolutionGenerator solutionGenerator,
             SolutionVerificationService solutionVerificationService,
             CaptchaDataRepository captchaDataRepository,
-            CaptchaImageGenerator captchaImageGenerator) {
+            CaptchaImageGenerator captchaImageGenerator,
+            CleanupService cleanupService,
+        @Value("${com.tomcvt.captcha.expiration-ms}") int captchaExpirationMillis) {
         this.solutionGenerator = solutionGenerator;
         this.solutionVerificationService = solutionVerificationService;
         this.captchaDataRepository = captchaDataRepository;
         this.captchaImageGenerator = captchaImageGenerator;
+        this.cleanupService = cleanupService;
+        this.captchaExpirationMillis = captchaExpirationMillis;
     }
 
     public CaptchaData createCaptcha(UUID requestId, CaptchaType type, String userIp) {
@@ -35,15 +44,18 @@ public class CaptchaService {
         captchaData.setType(type);
         captchaData.setUserIp(userIp);
         captchaData.setCreatedAt(System.currentTimeMillis());
-        captchaData.setExpiresAt(System.currentTimeMillis() + 5 * 60 * 1000);
+        captchaData.setExpiresAt(System.currentTimeMillis() + captchaExpirationMillis);
+        String fileName = null;
         // TODO make switch here
         if (type == CaptchaType.CLICK_IN_ORDER) {
             String solution = solutionGenerator.generateCIOSolution();
             captchaData.setSolution(solution);
             File imageFile = captchaImageGenerator.generateEmojiCaptchaImage(requestId, solution);
+            // TODO store in CDN or proper file storage
             String imageData = "/captcha-images/" + imageFile.getName();
+            fileName = imageFile.getName();
             captchaData.setData(imageData);
-            float clickRadius = 0.1f; // TODO refactor to pixel depending on config and emote size
+            int clickRadius = 36; // TODO refactor to pixel depending on config and emote size
             String parameters = null;
             try {
                 parameters = objectMapper.writeValueAsString(new CIOParameters(clickRadius));
@@ -53,7 +65,7 @@ public class CaptchaService {
             }
             captchaData.setParameters(parameters); // parameters to solve resolver
         }
-        System.out.println("Solution for captcha " + requestId + ": " + captchaData.getSolution());
+        cleanupService.scheduleCaptchaCleanup(requestId, fileName, captchaData.getExpiresAt());
         return captchaDataRepository.save(captchaData);
     }
 
@@ -61,15 +73,14 @@ public class CaptchaService {
         // TODO implement
         CaptchaData captchaData = captchaDataRepository.findByRequestId(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Captcha not found"));
+        if (captchaData.getExpiresAt() < System.currentTimeMillis()) {
+            throw new ExpiredCaptchaException("Captcha has expired");
+        }
         // TODO switch later
         if (type == CaptchaType.CLICK_IN_ORDER) {
             // TODO use SolutionVerificationService
             return solutionVerificationService.verifyCIOSolution(captchaData.getSolution(), solution);
         }
-
-        System.out.println("Verifying captcha solution for requestId: " + requestId + ", type: " + type + ", solution: "
-                + solution);
-
-        return true;
+        return false;
     }
 }
