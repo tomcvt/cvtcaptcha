@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.repository.UserRepository;
 
-import io.jsonwebtoken.security.Password;
-
 @Service
 public class AuthService {
     private final JwtService jwtService;

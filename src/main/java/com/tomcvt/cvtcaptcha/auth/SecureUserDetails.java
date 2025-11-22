@@ -24,6 +24,10 @@ public class SecureUserDetails implements UserDetails {
         return user;
     }
 
+    public Long getId() {
+        return user.getId();
+    }
+
     public String getIp() {
         return ip;
     }
@@ -42,19 +46,16 @@ public class SecureUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (user == null) {
-            return List.of(new SimpleGrantedAuthority("ROLE_ANON"));
-        }
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
     }
 
     @Override
     public String getPassword() {
-        return user != null ? user.getPassword() : "";
+        return user.getPassword();
     }
     @Override
     public String getUsername() {
-        return user != null ? user.getUsername() : "anonymous";
+        return user.getUsername();
     }
     @Override
     public boolean isAccountNonExpired() {
@@ -70,7 +71,7 @@ public class SecureUserDetails implements UserDetails {
     }
     @Override
     public boolean isEnabled() {
-        return user != null ? user.isEnabled() : true;
+        return user.isEnabled();
     }
 
 }

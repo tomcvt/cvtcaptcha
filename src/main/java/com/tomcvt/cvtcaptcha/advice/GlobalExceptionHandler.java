@@ -8,13 +8,26 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import com.tomcvt.cvtcaptcha.exceptions.InvalidTokenException;
-import com.tomcvt.cvtcaptcha.exceptions.WrongTypeException;
+import com.tomcvt.cvtcaptcha.exceptions.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-    
+    @ExceptionHandler(ExpiredCaptchaTokenException.class)
+    public ResponseEntity<String> handleExpiredCaptchaTokenException(ExpiredCaptchaTokenException ex) {
+        log.warn("ExpiredCaptchaTokenException: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+    @ExceptionHandler(CaptchaLimitExceededException.class)
+    public ResponseEntity<String> handleCaptchaLimitExceededException(CaptchaLimitExceededException ex) {
+        log.warn("CaptchaLimitExceededException: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
+    }
+    @ExceptionHandler(RequestLimitExceededException.class)
+    public ResponseEntity<String> handleRequestLimitExceededException(RequestLimitExceededException ex) {
+        log.warn("RequestLimitExceededException: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
+    }
     @ExceptionHandler(WrongTypeException.class)
     public ResponseEntity<String> handleWrongTypeException(WrongTypeException ex) {
         log.warn("WrongTypeException: " + ex.getMessage());

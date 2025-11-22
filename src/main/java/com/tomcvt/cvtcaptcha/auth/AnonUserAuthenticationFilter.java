@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.tomcvt.cvtcaptcha.config.AnonUserInitializer;
 import com.tomcvt.cvtcaptcha.network.GlobalRateLimiter;
 
 import jakarta.servlet.FilterChain;
@@ -16,17 +17,20 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
+    
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AnonUserAuthenticationFilter.class);
     private final GlobalRateLimiter rateLimiter;
+    private final AnonUserInitializer anonUserInitializer;
 
-    public AnonUserAuthenticationFilter(GlobalRateLimiter rateLimiter) {
+    public AnonUserAuthenticationFilter(GlobalRateLimiter rateLimiter, AnonUserInitializer anonUserInitializer) {
         this.rateLimiter = rateLimiter;
+        this.anonUserInitializer = anonUserInitializer;
     }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("AnonUserAuthenticationFilter invoked");
-        System.out.println("Current Authentication: " + SecurityContextHolder.getContext().getAuthentication());
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             String xff = request.getHeader("X-Forwarded-For");
             String ipAddress;
@@ -35,10 +39,11 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 ipAddress = request.getRemoteAddr();
             }
-            SecureUserDetails anonUserDetails = new SecureUserDetails(false, null, ipAddress);
+            SecureUserDetails anonUserDetails = new SecureUserDetails(false, anonUserInitializer.getAnonUser(), ipAddress);
             var authToken = new UsernamePasswordAuthenticationToken(
                     anonUserDetails, null, anonUserDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);
+            log.info("Authenticated anonymous user with IP: " + ipAddress);
             try {
                 rateLimiter.checkRateLimitAndIncrement(ipAddress);
             } catch (Exception e) {

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.tomcvt.cvtcaptcha.exceptions.ExpiredCaptchaTokenException;
 import com.tomcvt.cvtcaptcha.exceptions.InvalidTokenException;
 
 import io.jsonwebtoken.Claims;
@@ -44,7 +45,7 @@ public class CaptchaTokenService {
         var claims = parseToken(token);
         var expiration = claims.getPayload().getExpiration();
         if (expiration.before(new Date())) {
-            throw new InvalidTokenException("Captcha token has expired");
+            throw new ExpiredCaptchaTokenException("Captcha token has expired");
         }
         return claims.getPayload().get("requestId", String.class);
     }
@@ -54,7 +55,8 @@ public class CaptchaTokenService {
         try {
             return jwtParser.parseSignedClaims(token);
         } catch (Exception e) {
-            throw new InvalidTokenException("Invalid captcha token", e);
+            log.error("Invalid captcha token: {}", e.getMessage());
+            throw new InvalidTokenException("Invalid captcha token");
         }
     }
 }

@@ -15,6 +15,7 @@ public class DemoUsers {
     }
 
     public void createDemoUsers() {
+        authService.registerActivatedUser("anonymous", "", "", "ANON");
         authService.registerActivatedUser("admin", "123", "abc@gmail.com", "ADMIN");
         authService.registerActivatedUser("user", "123", "abe@gmail.com", "USER");
     }

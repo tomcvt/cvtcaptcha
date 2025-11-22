@@ -16,6 +16,7 @@ import com.tomcvt.cvtcaptcha.enums.CaptchaType;
 import com.tomcvt.cvtcaptcha.exceptions.WrongTypeException;
 import com.tomcvt.cvtcaptcha.model.CaptchaData;
 import com.tomcvt.cvtcaptcha.network.CaptchaRateLimiter;
+import com.tomcvt.cvtcaptcha.network.UserRateLimiter;
 import com.tomcvt.cvtcaptcha.service.CaptchaService;
 import com.tomcvt.cvtcaptcha.service.CaptchaTokenService;
 
@@ -24,15 +25,17 @@ import com.tomcvt.cvtcaptcha.service.CaptchaTokenService;
 public class CaptchaApiController {
     private final CaptchaService captchaService;
     private final CaptchaRateLimiter captchaRateLimiter;
+    private final UserRateLimiter userRateLimiter;
     private final CaptchaTokenService captchaTokenService;
     private final List<String> unlimitedUsers = List.of("ROLE_USER", "ROLE_ADMIN");
 
     public CaptchaApiController(CaptchaService captchaService, CaptchaRateLimiter captchaRateLimiter, 
-                                CaptchaTokenService captchaTokenService
+                                CaptchaTokenService captchaTokenService, UserRateLimiter userRateLimiter
     ) {
         this.captchaService = captchaService;
         this.captchaRateLimiter = captchaRateLimiter;
         this.captchaTokenService = captchaTokenService;
+        this.userRateLimiter = userRateLimiter;
     }
 
     @PostMapping("/create")
@@ -45,6 +48,7 @@ public class CaptchaApiController {
             captcha = captchaService.createCaptcha(captchaRequest.requestId(), type, userDetails.getIp());
         }
         if (userDetails.getAuthorities().stream().anyMatch(auth -> unlimitedUsers.contains(auth.getAuthority()))) {
+            userRateLimiter.checkAndIncrementUserCaptchaLimit(userDetails.getUser());
             captcha = captchaService.createCaptcha(captchaRequest.requestId(), type, "UNLIMITED_USER");
         }
         if (captcha == null) {
