@@ -34,6 +34,10 @@ public class AuthService {
     }
 
     public User registerActivatedUser(String username, String rawPassword, String email, String role) {
+        var existingUser = userRepository.findByUsername(username);
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
         var newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(passwordEncoder.encode(rawPassword));
