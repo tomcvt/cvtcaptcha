@@ -1,5 +1,5 @@
 package com.tomcvt.cvtcaptcha.dtos;
 
-public record CIOParameters(float clickRadius) {
+public record CIOParameters(int clickRadius) {
     
 }

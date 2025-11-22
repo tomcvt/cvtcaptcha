@@ -3,12 +3,15 @@ package com.tomcvt.cvtcaptcha.network;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.stereotype.Service;
+
 import com.tomcvt.cvtcaptcha.exceptions.CaptchaLimitExceededException;
 import com.tomcvt.cvtcaptcha.exceptions.RequestLimitExceededException;
 import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.model.UserLimits;
 import com.tomcvt.cvtcaptcha.repository.UserLimitsRepository;
 
+@Service
 public class UserRateLimiter {
     private final UserLimitsRepository userLimitsRepository;
     private final Map<Long, UserCounter> userCaptchaCounters;
@@ -31,6 +34,7 @@ public class UserRateLimiter {
         if (limits == null) {
             var dbLimits = userLimitsRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("User limits not found for user ID: " + user.getId()));
+            //TODO if not found create default limits?
             userLimitMap.put(user.getId(), dbLimits);
             limits = dbLimits;
         }

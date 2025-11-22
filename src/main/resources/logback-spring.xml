@@ -10,9 +10,6 @@
     <logger name="org.hibernate" level="DEBUG" additivity="false">
         <appender-ref ref="HIBERNATE_FILE"/>
     </logger>
-    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
-        <appender-ref ref="HIBERNATE_FILE"/>
-    </logger>
 
     <!-- Other logs to app.log -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

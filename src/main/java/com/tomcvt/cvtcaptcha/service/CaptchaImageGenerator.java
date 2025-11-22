@@ -36,22 +36,15 @@ public class CaptchaImageGenerator {
     }
 
     public File generateEmojiCaptchaImage(UUID requestId, String solution) {
-        System.out
-                .println("Generating emoji captcha image for requestId: " + requestId + " with solution: " + solution);
         List<Point> points = SolutionParser.parseCIOSolution(solution);
         List<String> emojis = emojiProvider.getRandomSet(points.size());
         List<String> emojiCodes = emojis.stream()
                 .map(EmojiProvider::map)
                 .toList();
-
-        System.out.println("Parsed points: " + emojiCodes);
-
         BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
-        g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
         g2d.setColor(Color.BLACK);
-        g2d.fillRect(2, 2, image.getWidth() - 4, image.getHeight() - 4);
+        g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
         int index = 0;
         for (Point point : points) {
             var oldTransform = g2d.getTransform();
@@ -66,10 +59,9 @@ public class CaptchaImageGenerator {
             try {
                 BufferedImage emojiImage = ImageIO.read(emojiStream);
                 g2d.drawImage(emojiImage, -emojiImage.getWidth() / 2, -emojiImage.getHeight() / 2, null);
-                g2d.setColor(Color.RED);
-                g2d.drawOval(-emojiImage.getWidth() / 2, -emojiImage.getHeight() / 2,
-                        72, 72);
-                g2d.drawRect(0,0,1,1);
+                //g2d.setColor(Color.RED);
+                //g2d.drawOval(-emojiImage.getWidth() / 2, -emojiImage.getHeight() / 2, 72, 72);
+                //g2d.drawRect(0,0,1,1);
             } catch (Exception e) {
                 e.printStackTrace();
             }

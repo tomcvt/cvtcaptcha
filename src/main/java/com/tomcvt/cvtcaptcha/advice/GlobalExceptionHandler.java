@@ -43,6 +43,17 @@ public class GlobalExceptionHandler {
         log.warn("NoResourceFoundException: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+    @ExceptionHandler(ExpiredCaptchaException.class)
+    public ResponseEntity<String> handleExpiredCaptchaException(ExpiredCaptchaException ex) {
+        log.warn("ExpiredCaptchaException: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.GONE).body(ex.getMessage());
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.warn("IllegalArgumentException: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception ex) {
         log.error("Unhandled exception: ", ex);
