@@ -21,17 +21,24 @@ spring:
     jwt:
       secret-key: ${JWT_SECRET_KEY}
       expiration-ms: 3600000
+
 com:
   tomcvt:
     request:
-      rate-limit:
-        max-requests: 100
-        time-window-ms: 60000
-    captcha:
       anon-rate-limit:
         max-requests: 100
+        time-window-ms: 60000
+      default-user-limit:
+        hourly-max-requests: 60000
+        daily-max-requests: 600000
+    captcha:
+      anon-rate-limit:
+        max-requests: 20
         time-window-ms: 3600000
-      expiration-ms: 300000
+      default-user-limit:
+        hourly-max-requests: 1000
+        daily-max-requests: 10000
+      expiration-ms: 300000 # 5 minutes
       max-attempts: 3
     cvt-token:
       secret: ${CVT_TOKEN_SECRET}

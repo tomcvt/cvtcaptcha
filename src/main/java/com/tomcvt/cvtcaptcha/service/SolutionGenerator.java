@@ -35,7 +35,6 @@ public class SolutionGenerator {
             sb.append(";");
         }
         sb.setLength(sb.length() - 1); 
-        System.out.println("Generated CIO solution: " + sb.toString());
         return sb.toString();
     }
 

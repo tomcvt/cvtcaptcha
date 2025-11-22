@@ -10,31 +10,38 @@ import com.tomcvt.cvtcaptcha.exceptions.RequestLimitExceededException;
 import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.model.UserLimits;
 import com.tomcvt.cvtcaptcha.repository.UserLimitsRepository;
+import com.tomcvt.cvtcaptcha.service.UserLimitsService;
 
 @Service
 public class UserRateLimiter {
     private final UserLimitsRepository userLimitsRepository;
+    private final UserLimitsService userLimitsService;
     private final Map<Long, UserCounter> userCaptchaCounters;
     private final Map<Long, UserCounter> userRequestCounters;
+    //TODO cache in different class 
     private final Map<Long, UserLimits> userLimitMap;
     //TODO on update on user limits update the userLimitMap
     private final long hourMillis = 3600000L;
     private final long dayMillis = 86400000L;
 
-    public UserRateLimiter(UserLimitsRepository userLimitsRepository) {
+    public UserRateLimiter(UserLimitsRepository userLimitsRepository,
+        UserLimitsService userLimitsService
+    ) {
         this.userCaptchaCounters = new ConcurrentHashMap<>();
         this.userRequestCounters = new ConcurrentHashMap<>();
         this.userLimitMap = new ConcurrentHashMap<>();
         this.userLimitsRepository = userLimitsRepository;
+        this.userLimitsService = userLimitsService;
     }
 
     public void checkAndIncrementUserCaptchaLimit(User user) throws CaptchaLimitExceededException {
         long currentTimeMillis = System.currentTimeMillis();
         UserLimits limits = userLimitMap.get(user.getId());
         if (limits == null) {
-            var dbLimits = userLimitsRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("User limits not found for user ID: " + user.getId()));
-            //TODO if not found create default limits?
+            var dbLimits = userLimitsRepository.findByUser(user).orElse(null);
+            if (dbLimits == null) {
+                dbLimits = userLimitsService.createDefaultLimitsForUser(user);
+            }
             userLimitMap.put(user.getId(), dbLimits);
             limits = dbLimits;
         }
@@ -70,8 +77,10 @@ public class UserRateLimiter {
         long currentTimeMillis = System.currentTimeMillis();
         UserLimits limits = userLimitMap.get(user.getId());
         if (limits == null) {
-            var dbLimits = userLimitsRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("User limits not found for user ID: " + user.getId()));
+            var dbLimits = userLimitsRepository.findByUser(user).orElse(null);
+            if (dbLimits == null) {
+                dbLimits = userLimitsService.createDefaultLimitsForUser(user);
+            }
             userLimitMap.put(user.getId(), dbLimits);
             limits = dbLimits;
         }

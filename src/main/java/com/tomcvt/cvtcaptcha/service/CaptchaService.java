@@ -70,7 +70,6 @@ public class CaptchaService {
     }
 
     public boolean verifyCaptchaSolution(UUID requestId, CaptchaType type, String solution) {
-        // TODO implement
         CaptchaData captchaData = captchaDataRepository.findByRequestId(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Captcha not found"));
         if (captchaData.getExpiresAt() < System.currentTimeMillis()) {
@@ -78,7 +77,6 @@ public class CaptchaService {
         }
         // TODO switch later
         if (type == CaptchaType.CLICK_IN_ORDER) {
-            // TODO use SolutionVerificationService
             return solutionVerificationService.verifyCIOSolution(captchaData.getSolution(), solution);
         }
         return false;

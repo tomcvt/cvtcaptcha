@@ -13,8 +13,8 @@ public class GlobalRateLimiter {
     private final long resetMilillis;
     private final int maxRequests;
 
-    public GlobalRateLimiter(@Value("${com.tomcvt.cvtcaptcha.request.rate-limit.time-window-ms}") long resetMilillis, 
-                       @Value("${com.tomcvt.cvtcaptcha.request.rate-limit.max-requests}") int maxRequests) {
+    public GlobalRateLimiter(@Value("${com.tomcvt.request.anon-rate-limit.time-window-ms}") long resetMilillis, 
+                       @Value("${com.tomcvt.request.anon-rate-limit.max-requests}") int maxRequests) {
         this.resetMilillis = resetMilillis;
         this.maxRequests = maxRequests;
     }

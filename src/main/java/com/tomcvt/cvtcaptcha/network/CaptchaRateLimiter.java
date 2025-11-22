@@ -13,8 +13,8 @@ public class CaptchaRateLimiter {
     private final long resetMilillis;
     private final int maxRequests;
 
-    public CaptchaRateLimiter(@Value("${com.tomcvt.cvtcaptcha.captcha.rate-limit.time-window-ms}") long resetMilillis,
-                       @Value("${com.tomcvt.cvtcaptcha.captcha.rate-limit.max-requests}") int maxRequests) {
+    public CaptchaRateLimiter(@Value("${com.tomcvt.captcha.anon-rate-limit.time-window-ms}") long resetMilillis,
+                       @Value("${com.tomcvt.captcha.anon-rate-limit.max-requests}") int maxRequests) {
         this.resetMilillis = resetMilillis;
         this.maxRequests = maxRequests;
     }
