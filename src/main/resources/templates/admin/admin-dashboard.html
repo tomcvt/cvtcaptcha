@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        .form-section { margin-bottom: 2em; }
+        label { display: block; margin-top: 1em; }
+        input, button { margin-top: 0.5em; }
+        .result { margin-top: 1em; color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Welcome, <span th:text="${username}"></span>!</h1>
+
+    <div class="form-section">
+        <h2>Generate API Key</h2>
+        <form id="generateApiKeyForm">
+            <label>Username:
+                <input type="text" id="username" name="username" th:value="${username}" readonly />
+            </label>
+            <label>Name for Key:
+                <input type="text" id="name" name="name" required />
+            </label>
+            <label>Domain URL:
+                <input type="text" id="domainUrl" name="domainUrl" required />
+            </label>
+            <button type="submit">Generate API Key</button>
+        </form>
+        <div id="generateResult" class="result"></div>
+        <div id="generateError" class="error"></div>
+    </div>
+
+    <div class="form-section">
+        <h2>Verify API Key</h2>
+        <form id="verifyApiKeyForm">
+            <label>API Key:
+                <input type="text" id="verifyApiKey" name="apiKey" required />
+            </label>
+            <button type="submit">Verify</button>
+        </form>
+        <div id="verifyResult" class="result"></div>
+        <div id="verifyError" class="error"></div>
+    </div>
+
+    <script>
+    document.getElementById('generateApiKeyForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        document.getElementById('generateResult').textContent = '';
+        document.getElementById('generateError').textContent = '';
+        const username = document.getElementById('username').value;
+        const name = document.getElementById('name').value;
+        const domainUrl = document.getElementById('domainUrl').value;
+        try {
+            const response = await fetch('/api/admin/create-consumer-api-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, name, domainUrl })
+            });
+            if (!response.ok) throw new Error('Failed to generate API key');
+            const data = await response.json();
+            document.getElementById('generateResult').textContent = `API Key: ${data.apiKey}\nName: ${data.name}\nDomain: ${data.domainUrl}`;
+        } catch (err) {
+            document.getElementById('generateError').textContent = err.message;
+        }
+    });
+
+    document.getElementById('verifyApiKeyForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        document.getElementById('verifyResult').textContent = '';
+        document.getElementById('verifyError').textContent = '';
+        const apiKey = document.getElementById('verifyApiKey').value;
+        try {
+            const response = await fetch(`/api/admin/verify-api-key?apiKey=${encodeURIComponent(apiKey)}`);
+            if (!response.ok) throw new Error('API key not found or invalid');
+            const data = await response.json();
+            document.getElementById('verifyResult').textContent = `API Key: ${data.apiKey}\nUsername: ${data.username}\nName: ${data.name}\nDomain: ${data.domainUrl}`;
+        } catch (err) {
+            document.getElementById('verifyError').textContent = err.message;
+        }
+    });
+    </script>
+</body>
+</html>

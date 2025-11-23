@@ -16,6 +16,6 @@ public class ApiKeyGeneratorUtil {
         byte[] apiKeyBytes = new byte[32];
         secureRandom.nextBytes(apiKeyBytes);
         String rawApiKey = encoder.encodeToString(apiKeyBytes);
-        return rawApiKey;
+        return "cvt-sk-" + rawApiKey;
     }
 }
