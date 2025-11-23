@@ -12,12 +12,15 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.tomcvt.cvtcaptcha.auth.AnonUserAuthenticationFilter;
+import com.tomcvt.cvtcaptcha.auth.ApiKeyAuthenticationFilter;
 import com.tomcvt.cvtcaptcha.auth.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+
+    private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AnonUserAuthenticationFilter anonUserAuthenticationFilter;
     private final String[] WHITELIST = {
@@ -27,9 +30,10 @@ public class SecurityConfig {
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter, 
-            AnonUserAuthenticationFilter anonUserAuthenticationFilter) {
+            AnonUserAuthenticationFilter anonUserAuthenticationFilter, ApiKeyAuthenticationFilter apiKeyAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.anonUserAuthenticationFilter = anonUserAuthenticationFilter;
+        this.apiKeyAuthenticationFilter = apiKeyAuthenticationFilter;
     }
 
 
@@ -47,6 +51,7 @@ public class SecurityConfig {
             .authenticationManager(authenticationManager)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(anonUserAuthenticationFilter, AnonymousAuthenticationFilter.class)
+            .addFilterBefore(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class)
             .anonymous(anonymous -> anonymous.disable());
 
         return http.build();
