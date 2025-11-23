@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tomcvt.cvtcaptcha.auth.SecureUserDetails;
 import com.tomcvt.cvtcaptcha.dtos.ConsumerApiKeyResponse;
 import com.tomcvt.cvtcaptcha.model.ConsumerApiKeyData;
 import com.tomcvt.cvtcaptcha.model.User;
@@ -31,6 +32,16 @@ public class ConsumerApiKeyService {
         this.consumerApiKeyRepository = consumerApiKeyRepository;
         this.userRepository = userRepository;
         this.apiKeyRegistry = apiKeyRegistry;
+    }
+
+    public SecureUserDetails authenticateApiKey(String apiKey) {
+        String apiKeyHash = hmacHashService.hash(apiKey);
+        ConsumerApiKeyData apiKeyData = apiKeyRegistry.getApiKeyData(apiKeyHash);
+        if (apiKeyData == null) {
+            throw new IllegalArgumentException("Invalid API Key");
+        }
+        User user = apiKeyData.getUser();
+        return new SecureUserDetails(true, user, null);
     }
 
     public ConsumerApiKeyResponse validateAndGetConsumerApiKeyData(String apiKey) {

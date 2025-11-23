@@ -31,6 +31,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         String authHeader = request.getHeader("Authorization");
 
         String token = null;
@@ -66,15 +71,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             userDetails.setIp(ipAddress);
             if (jwtService.validateToken(token, userDetails)) {
+                //TODO consider adding ip address logging, create a custom AuthenticationToken
                 var authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-            log.info("Authenticated user: " + username + " with IP: " + ipAddress);
+            log.info("Authenticated with jwt user: " + username + " with IP: " + ipAddress);
         }
 
         filterChain.doFilter(request, response);
-        
     }
 }
