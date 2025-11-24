@@ -1,6 +1,6 @@
 :root {
     /* Colors */
-    --color-bg: #e3e3e6;
+    --color-bg: #f5f6fa;
     --color-text: #333;
     --color-heading: #2c3e50;
     --color-subheading: #34495e;
@@ -11,10 +11,17 @@
     --color-primary: #3498db;
     --color-primary-hover: #2980b9;
     --color-primary-active: #1c5980;
+    --color-secondary: #f18f1f;
+    --color-secondary-hover: #ffa43c;
+    --color-secondary-active: #c57315;
+    --color-border-light: #ddd;
+    --color-border-dark: #aaa;
+
 
     /* Shadows */
     --shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.10);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
 
     /* Radius */
     --radius-sm: 5px;
@@ -52,7 +59,16 @@ body {
     padding: var(--space-md);
 }
 
-h1, h2 {
+.rows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+h1,
+h2 {
     text-align: center;
     color: var(--color-heading);
 }
@@ -63,6 +79,20 @@ h2 {
     font-size: 2rem;
     font-weight: 500;
     line-height: 2rem;
+}
+
+p {
+    margin-block-start: 0;
+    scroll-margin-block-end: 0;
+    width: 100%;
+}
+
+.menu-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+    margin: var(--space-lg) auto;
 }
 
 .card {
@@ -85,24 +115,43 @@ h2 {
     border-radius: var(--radius-sm);
     background: #f9fafb;
     display: flex;
-    gap: var(--space-sm);
     justify-content: space-between;
-    /* flex-wrap: wrap; */
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease;
 }
 
-@media (max-width: 700px) {
-    .field, .summary-field {
-        flex-direction: column !important;
-        align-items: stretch;
-    }
-    .field > div, .summary-field > div {
-        margin-bottom: var(--space-xs);
-    }
+.field:hover {
+    box-shadow: var(--shadow-md);
 }
-
 
 .field strong {
     color: var(--color-subheading);
+}
+.clr-primary {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.clr-primary:hover {
+    background: var(--color-primary-hover);
+}
+
+.clr-primary:active {
+    background: var(--color-primary-active);
+}
+
+.clr-secondary {
+    background: var(--color-secondary);
+    color: #fff;
+    /* margin-top: var(--space-md); */
+}
+
+.clr-secondary:hover {
+    background: var(--color-secondary-hover);
+}
+
+.clr-secondary:active {
+    background: var(--color-secondary-active);
 }
 
 /* Alerts */
@@ -116,6 +165,7 @@ h2 {
     box-sizing: border-box;
     border-width: 1px;
     border-style: solid;
+    /*font-weight: bold;*/
     text-align: center;
 }
 
@@ -126,7 +176,7 @@ h2 {
     border: 1px solid #e38e96;
 }
 
-.alert.alert-success {
+.alert-success {
     color: #145222;
     background-color: #d1f0d9;
     border: 1px solid #87e49c;
@@ -141,7 +191,6 @@ h2 {
     cursor: pointer;
     font-size: 1rem;
     transition: background 0.2s ease;
-    width: 100%;
 }
 
 .btn-primary {
@@ -158,9 +207,17 @@ h2 {
 }
 
 .btn-secondary {
-    background: var(--color-primary);
+    background: var(--color-secondary);
     color: #fff;
-    margin-top: var(--space-md);
+    /* margin-top: var(--space-md); */
+}
+
+.btn-secondary:hover {
+    background: var(--color-secondary-hover);
+}
+
+.btn-secondary:active {
+    background: var(--color-secondary-active);
 }
 
 .btn-small {
@@ -168,9 +225,8 @@ h2 {
     font-size: .875rem;
 }
 
-.btn-flex1 {
-    width: auto !important;
-    flex: 1;
+.wide {
+    width: 100%;
 }
 
 /* Utility classes */
@@ -204,7 +260,8 @@ table {
     border-collapse: collapse;
 }
 
-.table-striped th, td {
+.table-striped th,
+td {
     padding: var(--space-sm);
 }
 
@@ -212,12 +269,13 @@ table {
     background-color: #e1e1e1;
 }
 
-tr.v-middle > td {
+tr.v-middle>td {
     vertical-align: middle;
 }
 
 /* Forms */
 input[type="text"],
+input[type="email"],
 input[type="password"] {
     height: auto;
     width: 100%;
@@ -228,17 +286,104 @@ input[type="password"] {
     border: 1px solid #ccc;
 }
 
-.login-form,
-.logout-form,
-.register-form,
-.default-form {
-    padding: 0 15px 15px 15px;
-    margin: 0 auto var(--space-lg) auto;
-    box-sizing: border-box;
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    margin: auto;
 }
 
 .login-form,
 .logout-form,
-.register-form {
-    max-width: 400px;
+.register-form,
+.default-form {
+    max-width: 340px;
+    padding: 0 15px 15px 15px;
+    margin: 0 auto var(--space-lg) auto;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+}
+
+
+.login-form h2,
+.register-form h2 {
+    color: var(--color-heading);
+    text-align: center;
+    margin-bottom: var(--space-md);
+}
+
+/* Cell Layout */
+.cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    margin: 0 12px;
+}
+
+.cell-label {
+    font-size: 0.95rem;
+    color: var(--color-subheading);
+    margin-bottom: 2px;
+    text-align: center;
+}
+
+.cell-value {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--color-heading);
+    text-align: center;
+}
+
+.field.click-row {
+    cursor: pointer;
+    transition: box-shadow 0.2s, background 0.2s;
+}
+
+.field.click-row:hover {
+    background: #f0f6ff;
+    box-shadow: var(--shadow-md);
+}
+
+/* Styled select */
+
+.styled-select {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-light);
+    font-size: 1rem;
+    background: #fff;
+    color: var(--color-text);
+    transition: border-color 0.2s;
+    outline: none;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+
+.styled-select:focus {
+    border-color: var(--color-primary);
+}
+
+.panelOption {
+    display: block;
+    background: #fff;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    box-sizing: border-box;
+    width: 700px;
+    max-width: auto;
+    margin: 0 auto;
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.3s ease;
+}
+
+.panelOption:hover {
+    box-shadow: var(--shadow-md);
 }

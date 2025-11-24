@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Home</title>
+</head>
+<body>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+	<h1 th:text="${title}">Welcome to CVT Captcha!</h1>
+	<p th:text="${message}">This is your home page.</p>
+    <p th:text="${userIp}"></p>
+    <p th:text="${username}"></p>
+    <p th:text="${remainingRequests}"></p>
+
+    <button id="captchaButton">Get Captcha</button>
+    <button onclick="window.location.href='/admin/dashboard';" target="_blank">Go to Admin Dashboard</button>
+    <div id="captchaData"></div>
+    <br><br>
+    <div id="captchaContainer"></div>
+    <script type="module" src="/js/testing-home.js"></script>
+</body>
+</html>

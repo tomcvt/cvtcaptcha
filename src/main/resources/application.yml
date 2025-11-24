@@ -27,12 +27,12 @@ com:
     request:
       anon-rate-limit:
         max-requests: 100
-        time-window-ms: 60000
+        time-window-ms: 60000 # 1 minute
       default-user-limit:
         hourly-max-requests: 60000
         daily-max-requests: 600000
       ip-registry-cleaner:
-        interval-ms: 3600000 
+        interval-ms: 3600000 # 1 hour
     captcha:
       anon-rate-limit:
         max-requests: 20
@@ -50,6 +50,7 @@ com:
     superuser:
       username: ${SUPERUSER_USERNAME}
       password: ${SUPERUSER_PASSWORD}
+      api-key: ${SUPERUSER_API_KEY}
 
 app:
   domain: https://cvtcaptcha.example.com

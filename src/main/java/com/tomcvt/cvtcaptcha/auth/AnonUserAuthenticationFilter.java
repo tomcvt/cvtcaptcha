@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.tomcvt.cvtcaptcha.config.AnonUserInitializer;
+import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.network.AnonRequestLimiter;
 
 import jakarta.servlet.FilterChain;
@@ -20,11 +21,14 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
     
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AnonUserAuthenticationFilter.class);
     private final AnonRequestLimiter rateLimiter;
-    private final AnonUserInitializer anonUserInitializer;
+    private User anonUser;
 
     public AnonUserAuthenticationFilter(AnonRequestLimiter rateLimiter, AnonUserInitializer anonUserInitializer) {
         this.rateLimiter = rateLimiter;
-        this.anonUserInitializer = anonUserInitializer;
+    }
+
+    public void setAnonUser(User anonUser) {
+        this.anonUser = anonUser;
     }
 
 
@@ -39,7 +43,7 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 ipAddress = request.getRemoteAddr();
             }
-            SecureUserDetails anonUserDetails = new SecureUserDetails(false, anonUserInitializer.getAnonUser(), ipAddress);
+            SecureUserDetails anonUserDetails = new SecureUserDetails(false, anonUser, ipAddress);
             var authToken = new UsernamePasswordAuthenticationToken(
                     anonUserDetails, null, anonUserDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);

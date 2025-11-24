@@ -4,6 +4,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.tomcvt.cvtcaptcha.auth.AuthService;
+import com.tomcvt.cvtcaptcha.auth.DisabledLoginRegistry;
 import com.tomcvt.cvtcaptcha.auth.JwtResponse;
 import com.tomcvt.cvtcaptcha.dtos.LoginRequest;
 
@@ -13,9 +14,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LoginController {
 
     private final AuthService authService;
+    private final DisabledLoginRegistry disabledLoginRegistry;
 
-    LoginController(AuthService authService) {
+    LoginController(AuthService authService, DisabledLoginRegistry disabledLoginRegistry) {
         this.authService = authService;
+        this.disabledLoginRegistry = disabledLoginRegistry;
     }
     
     @GetMapping("/login")
@@ -27,6 +30,9 @@ public class LoginController {
     public String processLogin(@RequestBody LoginRequest loginRequest, 
                                 HttpServletResponse response
     ) {
+        if (disabledLoginRegistry.isLoginDisabled(loginRequest.username())) {
+            throw new IllegalArgumentException("This login method is disabled for this user");
+        }
         JwtResponse jwtResponse = authService.authenticate(loginRequest.username(), loginRequest.password());
         ResponseCookie cookie = ResponseCookie.from("jwt", jwtResponse.token())
                 .httpOnly(true)

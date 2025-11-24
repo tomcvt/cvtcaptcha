@@ -1,5 +1,7 @@
 package com.tomcvt.cvtcaptcha.workers;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -25,6 +27,16 @@ public class CaptchaCleanupQueue {
 
     public CaptchaCleanupTask take() throws InterruptedException {
         return taskQueue.take();
+    }
+
+    public Map<Integer, String> getQueueSnapshot() {
+        Map<Integer, String> pendingTasks = new HashMap<>();
+        int counter = 1;
+        for (CaptchaCleanupTask task : taskQueue) {
+            pendingTasks.put(counter, task.toString());
+            counter++;
+        }
+        return pendingTasks;
     }
 
 }

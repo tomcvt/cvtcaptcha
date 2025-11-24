@@ -4,19 +4,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.tomcvt.cvtcaptcha.auth.AuthService;
 import com.tomcvt.cvtcaptcha.dtos.ApiKeyRequest;
 import com.tomcvt.cvtcaptcha.dtos.ConsumerApiKeyResponse;
+import com.tomcvt.cvtcaptcha.dtos.CreateUserRequest;
+import com.tomcvt.cvtcaptcha.enums.UserTypes;
+import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.service.ConsumerApiKeyService;
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN','SUPERUSER')")
 public class AdminApiController {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminApiController.class);
     private final ConsumerApiKeyService consumerApiKeyService;
+    private final AuthService authService;
 
-    public AdminApiController(ConsumerApiKeyService consumerApiKeyService) {
+    public AdminApiController(ConsumerApiKeyService consumerApiKeyService,
+        AuthService authService
+    ) {
         this.consumerApiKeyService = consumerApiKeyService;
+        this.authService = authService;
     }
 
     @PostMapping("/create-consumer-api-key")
@@ -46,6 +54,28 @@ public class AdminApiController {
         }
         if (request.name() == null || request.name().isEmpty()) {
             throw new IllegalArgumentException("Name is required");
+        }
+    }
+
+    @PostMapping("/create-user")
+    public ResponseEntity<?> createUser(@RequestBody CreateUserRequest request) {
+        String role = validateUserType(request.role());
+        User user = authService.registerActivatedUser(
+            request.username(),
+            request.password(),
+            request.email(),
+            role
+        );
+        return ResponseEntity.ok("User created successfully");
+    }
+
+
+    private String validateUserType(String role) {
+        try {
+            var ut = UserTypes.valueOf(role.toUpperCase());
+            return ut.name();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid user role: " + role);
         }
     }
 }

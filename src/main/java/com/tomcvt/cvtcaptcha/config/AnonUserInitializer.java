@@ -8,7 +8,7 @@ import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.repository.UserRepository;
 
 @Component
-public class AnonUserInitializer implements ApplicationListener<ApplicationReadyEvent> {
+public class AnonUserInitializer {
     private final UserRepository userRepository;
     private User anonUser;
     public AnonUserInitializer(UserRepository userRepository) {
@@ -19,8 +19,7 @@ public class AnonUserInitializer implements ApplicationListener<ApplicationReady
         return anonUser;
     }
 
-    @Override
-    public void onApplicationEvent(ApplicationReadyEvent event) {
+    public void init() {
         var anonUserOpt = userRepository.findByUsername("anonymous");
         if (anonUserOpt.isPresent()) {
             anonUser = anonUserOpt.get();

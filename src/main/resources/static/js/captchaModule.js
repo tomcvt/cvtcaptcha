@@ -17,6 +17,7 @@ const CaptchaModule = {
         let solved = null;
         let userSolution = "";
         let markers = [];
+        let markerElements = [];
         let doOnSuccess = null;
         let requestId = "00000000-0000-0000-0000-000000000000";
         if (!config || !config.type) {
@@ -36,6 +37,7 @@ const CaptchaModule = {
             }
             captchaData = await response.json();
             requestId = captchaData.requestId;
+            captchaData.requiredClicks = captchaData.requiredClicks || 4;
             return captchaData;
         })();
 
@@ -48,7 +50,8 @@ const CaptchaModule = {
                 body: JSON.stringify({ requestId: requestId, type: config.type, solution: solution })
             });
             if (!response.ok) {
-                throw new Error(await response.text());
+                console.log(await response.text());
+                return false;
             }
             const result = await response.json();
             cvtCaptchaToken = result.cvtCaptchaToken;
@@ -78,20 +81,38 @@ const CaptchaModule = {
                     const index = markers.length + 1;
                     const marker = createMarker(x, y, index);
                     imgWrapper.appendChild(marker);
+                    markerElements.push(marker);
                     markers.push({ x: x, y: y });
                     const relX = x / img.width;
                     const relY = y / img.height;
                     userSolution += relX.toFixed(4) + ',' + relY.toFixed(4) + ';';
+
+                    if (markers.length >= captchaData.requiredClicks) {
+                        verifyCaptchaAndGetToken(userSolution);
+                    }
                 }
             });
         }
 
-        function resetCaptcha() {
-            markers.forEach(marker => {
-                if (marker.element && marker.element.parentElement) {
-                    marker.element.parentElement.removeChild(marker.element);
+        async function verifyCaptchaAndGetToken(solution) {
+            const isSolved = await verifyCaptcha(userSolution);
+            if (isSolved) {
+                alert('Captcha solved successfully!');
+                if (doOnSuccess) {
+                    doOnSuccess({ requestId: requestId, type: config.type, solution: userSolution }, cvtCaptchaToken);
                 }
+            } else {
+                alert('Captcha solution incorrect. Please try again.');
+            }
+            resetCaptcha();
+        }
+
+
+        function resetCaptcha() {
+            markerElements.forEach(marker => {
+                imgWrapper.removeChild(marker);
             });
+            markerElements = [];
             markers = [];
             userSolution = "";
         }
@@ -111,6 +132,7 @@ const CaptchaModule = {
                 moduleBox.style.height = (img.height + 50) + 'px';
                 moduleBox.style.display = 'flex';
                 moduleBox.style.flexDirection = 'column';
+                moduleBox.style.gap = '10px';
                 moduleBox.style.alignItems = 'center';
                 moduleBox.style.justifyContent = 'center';
                 container.appendChild(moduleBox);
@@ -129,17 +151,7 @@ const CaptchaModule = {
                 const submitButton = document.createElement('button');
                 submitButton.textContent = 'Submit Captcha';
                 submitButton.onclick = async () => {
-                    
-                    const isSolved = await verifyCaptcha(userSolution);
-                    if (isSolved) {
-                        alert('Captcha solved successfully!');
-                        if (doOnSuccess) {
-                            doOnSuccess({ requestId: requestId, type: config.type, solution: userSolution }, cvtCaptchaToken);
-                        }
-                    } else {
-                        alert('Captcha solution incorrect. Please try again.');
-                    }
-                    resetCaptcha();
+                    await verifyCaptchaAndGetToken(userSolution);
                 };
                 moduleBox.appendChild(submitButton);
             },

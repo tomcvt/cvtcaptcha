@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Captcha</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card center">
+            <h1>Test Captcha</h1>
+            <p class="center" th:text="'Hello, ' + ${username} + '!'">Hello, user!</p>
+            <p class="center" th:if="${isAnon}" th:text="'As an anonymous user, you have ' + ${remainingRequests} + ' requests remaining.'"></p>
+            <p class="center" th:unless="${isAnon}">You are logged in with full access.</p>
+        </div>
+        <div class="rows center">
+            <button class="btn btn-primary wide" id="captchaButton">Get Captcha</button>
+            <button class="btn btn-secondary wide" id="showTokenBtn" disabled>Display Captcha Token</button>
+            <button class="btn btn-secondary wide" id="verifyTokenBtn" disabled>Verify Captcha Token</button>
+        </div>
+        <div id="captchaContainer" class="center"></div>
+    </div>
+    <script type="module">
+        import CaptchaModule from '/js/captchaModule.js';
+        let captchaToken = null;
+        const captchaButton = document.getElementById('captchaButton');
+        const showTokenBtn = document.getElementById('showTokenBtn');
+        const verifyTokenBtn = document.getElementById('verifyTokenBtn');
+        const captchaContainer = document.getElementById('captchaContainer');
+
+        captchaButton.addEventListener('click', () => {
+            captchaContainer.innerHTML = '';
+            captchaToken = null;
+            showTokenBtn.disabled = true;
+            verifyTokenBtn.disabled = true;
+            CaptchaModule.Captcha({
+                type: 'CLICK_IN_ORDER',
+                onSuccess: (data, token) => {
+                    alert('Captcha solved! Token: ' + token);
+                    captchaToken = token;
+                    showTokenBtn.disabled = false;
+                    verifyTokenBtn.disabled = false;
+                }
+            }).renderInto('#captchaContainer');
+        });
+
+        showTokenBtn.addEventListener('click', () => {
+            if (captchaToken) {
+                alert('Captcha Token: ' + captchaToken);
+            }
+        });
+
+        verifyTokenBtn.addEventListener('click', async () => {
+            if (!captchaToken) return;
+            try {
+                const response = await fetch('/api/captcha/verify?token=' + encodeURIComponent(captchaToken), {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) throw new Error('Failed to verify captcha token: ' + response.statusText);
+                const data = await response.text();
+                alert('Captcha token verified successfully! Response: ' + data);
+            } catch (error) {
+                alert('Error verifying captcha token: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

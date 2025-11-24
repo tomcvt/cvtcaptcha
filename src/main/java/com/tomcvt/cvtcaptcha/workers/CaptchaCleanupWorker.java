@@ -4,8 +4,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import com.tomcvt.cvtcaptcha.records.CaptchaCleanupTask;
 import com.tomcvt.cvtcaptcha.repository.CaptchaDataRepository;
 
@@ -17,8 +15,8 @@ public class CaptchaCleanupWorker implements Runnable {
     private volatile boolean running = true;
     private volatile boolean paused = false;
 
-    public CaptchaCleanupWorker(CaptchaCleanupQueue taskQueue, 
-        @Value("${app.captcha-dir}") String storageDir,
+    public CaptchaCleanupWorker(CaptchaCleanupQueue taskQueue,
+            String storageDir,
             CaptchaDataRepository captchaDataRepository) {
         this.taskQueue = taskQueue;
         this.storageDir = storageDir;
@@ -55,7 +53,6 @@ public class CaptchaCleanupWorker implements Runnable {
                 if (task.scheduledTimeMillis() > currentTimeMillis) {
                     // just w8 and process
                     Thread.sleep(task.scheduledTimeMillis() - currentTimeMillis);
-                    continue;
                 }
                 processTask(task);
             } catch (InterruptedException e) {
@@ -63,6 +60,7 @@ public class CaptchaCleanupWorker implements Runnable {
             }
         }
     }
+
     private void processTask(CaptchaCleanupTask task) {
         deleteCaptchaImage(task.requestId(), task.fileName());
     }

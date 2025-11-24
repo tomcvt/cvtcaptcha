@@ -1,35 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8">
-	<title>Home</title>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
-	<h1 th:text="${title}">Welcome to CVT Captcha!</h1>
-	<p th:text="${message}">This is your home page.</p>
-    <p th:text="${userIp}"></p>
-    <p th:text="${username}"></p>
-    <p th:text="${remainingRequests}"></p>
-
-    <button id="captchaButton">Get Captcha</button>
-    <button onclick="window.location.href='/admin/dashboard';" target="_blank">Go to Admin Dashboard</button>
-    <div id="captchaData"></div>
-    <br><br>
-    <div id="captchaContainer"></div>
-    <emoji-picker id="emojiPicker"></emoji-picker>
-    <script>
-        const emojiPicker = document.getElementById('emojiPicker');
-        emojiPicker.addEventListener('emoji-click', event => {
-            const emoji = event.detail.unicode;
-        // Convert to Unicode code points (e.g., U+1F600)
-        const codePoints = Array.from(emoji)
-            .map(char => 'U+' + char.codePointAt(0).toString(16).toUpperCase())
-            .join(' ');
-        // Display the code points (for example, in the console or on the page)
-        console.log('Selected emoji code:', codePoints);
-        });
-    </script>
+    <div class="container">
+        <div class="card center">
+            <h1>Welcome to CVT Captcha!</h1>
+            <p class="center" th:text="'Hello, ' + ${username} + '!'">Hello, user!</p>
+            <p class="center" th:if="${isAnon}" th:text="'As an anonymous user, you have ' + ${remainingRequests} + ' requests remaining.'"></p>
+        </div>
+        <div class="rows center">
+            <button class="btn btn-secondary wide" onclick="window.location.href='/test';">Go to Test Page</button>
+            <button class="btn btn-primary wide" onclick="window.location.href='/login';">Login</button>
+            <button class="btn btn-primary wide" onclick="window.location.href='/register';">Register</button>
+        </div>
+        <div id="captchaData" class="center"></div>
+        <div id="captchaContainer" class="center"></div>
+    </div>
     <script type="module" src="/js/home.js"></script>
 </body>
 </html>

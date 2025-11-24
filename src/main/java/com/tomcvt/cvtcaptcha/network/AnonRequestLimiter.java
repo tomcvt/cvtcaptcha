@@ -24,8 +24,6 @@ public class AnonRequestLimiter {
         return requestCounts.get(key);
     }
 
-
-
     public int getRemainingRequests(String key) {
         RequestCounter counter = requestCounts.get(key);
         if (counter == null) {
