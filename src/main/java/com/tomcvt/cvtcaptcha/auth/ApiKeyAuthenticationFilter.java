@@ -15,6 +15,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 //TODO add logging to security files, monitor failed attempts for ip
 @Component
 public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
@@ -28,7 +29,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
         String apiKey = request.getHeader("X-API-KEY");
 
         if (apiKey != null) {
@@ -40,28 +41,23 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                 ipAddress = request.getRemoteAddr();
             }
 
+            SecureUserDetails userDetails = null;
             try {
-                SecureUserDetails userDetails = null;
-                try {
-                    userDetails = consumerApiKeyService.authenticateApiKey(apiKey);
-                } catch (IllegalArgumentException e) {
-                    log.warn("Failed to authenticate API key: " + e.getMessage() + " from IP: " + ipAddress);
-                    writeErrorResponse(response, "Invalid API Key");
-                    return;
-                }
-                //TODO consider adding ip address logging, create a custom AuthenticationToken
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-                log.info("Authenticated API key for user: " + userDetails.getUsername());
-            } catch (Exception e) {
-                log.warn("Failed to authenticate API key: " + e.getMessage());
-                response.sendError(401, "Invalid API Key");
+                userDetails = consumerApiKeyService.authenticateApiKey(apiKey);
+            } catch (IllegalArgumentException e) {
+                log.warn("Failed to authenticate API key: " + e.getMessage() + " from IP: " + ipAddress);
+                writeErrorResponse(response, "Invalid API Key");
                 return;
             }
+            // TODO consider adding ip address logging, create a custom AuthenticationToken
+            var authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            log.info("Authenticated API key for user: " + userDetails.getUsername());
+
         }
-        
+
         filterChain.doFilter(request, response);
     }
 
@@ -71,5 +67,5 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         response.getWriter().write("{\"error\": \"" + message + "\"}");
         response.getWriter().flush();
     }
-    
+
 }

@@ -2,22 +2,29 @@ package com.tomcvt.cvtcaptcha.network;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.catalina.connector.Request;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.tomcvt.cvtcaptcha.exceptions.RateLimitExceededException;
 
 @Service
-public class GlobalRateLimiter {
-    private final ConcurrentHashMap<String, RequestCounter> requestCounts = new ConcurrentHashMap<>();
-    private final long resetMilillis;
+public class AnonRequestLimiter {
+    protected final ConcurrentHashMap<String, RequestCounter> requestCounts = new ConcurrentHashMap<>();
+    protected final long resetMilillis;
     private final int maxRequests;
 
-    public GlobalRateLimiter(@Value("${com.tomcvt.request.anon-rate-limit.time-window-ms}") long resetMilillis, 
+    public AnonRequestLimiter(@Value("${com.tomcvt.request.anon-rate-limit.time-window-ms}") long resetMilillis, 
                        @Value("${com.tomcvt.request.anon-rate-limit.max-requests}") int maxRequests) {
         this.resetMilillis = resetMilillis;
         this.maxRequests = maxRequests;
     }
+
+    public RequestCounter getRequestCounter(String key) {
+        return requestCounts.get(key);
+    }
+
+
 
     public int getRemainingRequests(String key) {
         RequestCounter counter = requestCounts.get(key);

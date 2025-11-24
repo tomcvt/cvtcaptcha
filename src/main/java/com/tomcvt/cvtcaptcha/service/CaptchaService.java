@@ -12,7 +12,9 @@ import com.tomcvt.cvtcaptcha.dtos.CIOParameters;
 import com.tomcvt.cvtcaptcha.enums.CaptchaType;
 import com.tomcvt.cvtcaptcha.exceptions.ExpiredCaptchaException;
 import com.tomcvt.cvtcaptcha.model.CaptchaData;
+import com.tomcvt.cvtcaptcha.records.CaptchaCleanupTask;
 import com.tomcvt.cvtcaptcha.repository.CaptchaDataRepository;
+import com.tomcvt.cvtcaptcha.workers.CaptchaCleanupQueue;
 
 @Service
 public class CaptchaService {
@@ -20,7 +22,7 @@ public class CaptchaService {
     private final SolutionVerificationService solutionVerificationService;
     private final CaptchaDataRepository captchaDataRepository;
     private final CaptchaImageGenerator captchaImageGenerator;
-    private final CleanupService cleanupService;
+    private final CaptchaCleanupQueue captchaCleanupQueue;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final int captchaExpirationMillis;
 
@@ -28,13 +30,13 @@ public class CaptchaService {
             SolutionVerificationService solutionVerificationService,
             CaptchaDataRepository captchaDataRepository,
             CaptchaImageGenerator captchaImageGenerator,
-            CleanupService cleanupService,
+            CaptchaCleanupQueue captchaCleanupQueue,
         @Value("${com.tomcvt.captcha.expiration-ms}") int captchaExpirationMillis) {
         this.solutionGenerator = solutionGenerator;
         this.solutionVerificationService = solutionVerificationService;
         this.captchaDataRepository = captchaDataRepository;
         this.captchaImageGenerator = captchaImageGenerator;
-        this.cleanupService = cleanupService;
+        this.captchaCleanupQueue = captchaCleanupQueue;
         this.captchaExpirationMillis = captchaExpirationMillis;
     }
 
@@ -65,7 +67,12 @@ public class CaptchaService {
             }
             captchaData.setParameters(parameters); // parameters to solve resolver
         }
-        cleanupService.scheduleCaptchaCleanup(requestId, fileName, captchaData.getExpiresAt());
+        CaptchaCleanupTask task = new CaptchaCleanupTask(
+            requestId,
+            fileName,
+            captchaData.getExpiresAt()
+        );
+        captchaCleanupQueue.offer(task);
         return captchaDataRepository.save(captchaData);
     }
 

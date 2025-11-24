@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.tomcvt.cvtcaptcha.config.AnonUserInitializer;
-import com.tomcvt.cvtcaptcha.network.GlobalRateLimiter;
+import com.tomcvt.cvtcaptcha.network.AnonRequestLimiter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,10 +19,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
     
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AnonUserAuthenticationFilter.class);
-    private final GlobalRateLimiter rateLimiter;
+    private final AnonRequestLimiter rateLimiter;
     private final AnonUserInitializer anonUserInitializer;
 
-    public AnonUserAuthenticationFilter(GlobalRateLimiter rateLimiter, AnonUserInitializer anonUserInitializer) {
+    public AnonUserAuthenticationFilter(AnonRequestLimiter rateLimiter, AnonUserInitializer anonUserInitializer) {
         this.rateLimiter = rateLimiter;
         this.anonUserInitializer = anonUserInitializer;
     }

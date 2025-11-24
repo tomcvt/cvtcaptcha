@@ -6,13 +6,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.tomcvt.cvtcaptcha.auth.SecureUserDetails;
-import com.tomcvt.cvtcaptcha.network.GlobalRateLimiter;
+import com.tomcvt.cvtcaptcha.network.AnonRequestLimiter;
 
 @Controller
 public class HomeController {
-    private final GlobalRateLimiter rateLimiter;
+    private final AnonRequestLimiter rateLimiter;
 
-    public HomeController(GlobalRateLimiter rateLimiter) {
+    public HomeController(AnonRequestLimiter rateLimiter) {
         this.rateLimiter = rateLimiter;
     }
 

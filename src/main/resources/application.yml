@@ -31,6 +31,8 @@ com:
       default-user-limit:
         hourly-max-requests: 60000
         daily-max-requests: 600000
+      ip-registry-cleaner:
+        interval-ms: 3600000 
     captcha:
       anon-rate-limit:
         max-requests: 20
@@ -45,6 +47,9 @@ com:
       expiration-ms: 600000 # 10 minutes
     hmac-hash-service:
       secret: ${API_KEY_GENERATOR_SECRET}
+    superuser:
+      username: ${SUPERUSER_USERNAME}
+      password: ${SUPERUSER_PASSWORD}
 
 app:
   domain: https://cvtcaptcha.example.com
