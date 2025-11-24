@@ -44,6 +44,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+            //TODO learn where the actual authorization HttpRequest is happening (probably context aware filter)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(WHITELIST).permitAll()
                 .anyRequest().authenticated()

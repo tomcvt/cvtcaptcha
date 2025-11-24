@@ -45,6 +45,7 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authToken);
             log.info("Authenticated anonymous user with IP: " + ipAddress);
             try {
+                //TODO change to anon rate limiter
                 rateLimiter.checkRateLimitAndIncrement(ipAddress);
             } catch (Exception e) {
                 response.sendError(429, "Rate limit exceeded");

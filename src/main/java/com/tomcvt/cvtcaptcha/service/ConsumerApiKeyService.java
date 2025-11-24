@@ -38,6 +38,7 @@ public class ConsumerApiKeyService {
         String apiKeyHash = hmacHashService.hash(apiKey);
         ConsumerApiKeyData apiKeyData = apiKeyRegistry.getApiKeyData(apiKeyHash);
         if (apiKeyData == null) {
+            //TODO custom exception and logging for ip in security logs
             throw new IllegalArgumentException("Invalid API Key");
         }
         User user = apiKeyData.getUser();

@@ -34,5 +34,4 @@ public class AnonUserInitializer implements ApplicationListener<ApplicationReady
             anonUser = userRepository.save(newAnonUser);
         }
     }
-    
 }

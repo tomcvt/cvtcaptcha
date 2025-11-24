@@ -27,7 +27,8 @@ public class CaptchaApiController {
     private final CaptchaRateLimiter captchaRateLimiter;
     private final UserRateLimiter userRateLimiter;
     private final CaptchaTokenService captchaTokenService;
-    private final List<String> unlimitedUsers = List.of("ROLE_USER", "ROLE_ADMIN");
+    private final List<String> limitedConsumers = List.of("ROLE_USER", "ROLE_ADMIN");
+    private final List<String> unlimitedConsumers = List.of("ROLE_SUPERUSER", "ROLE_TOMCVT");
 
     public CaptchaApiController(CaptchaService captchaService, CaptchaRateLimiter captchaRateLimiter, 
                                 CaptchaTokenService captchaTokenService, UserRateLimiter userRateLimiter
@@ -44,17 +45,20 @@ public class CaptchaApiController {
         CaptchaData captcha = null;
         CaptchaType type = parseCaptchaType(captchaRequest.type());
         if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ANON"))) {
+            //TODO change to anon rate limiter
             captchaRateLimiter.checkAndIncrementAnonymousLimit(userDetails.getIp());
             captcha = captchaService.createCaptcha(captchaRequest.requestId(), type, userDetails.getIp());
         }
-        if (userDetails.getAuthorities().stream().anyMatch(auth -> unlimitedUsers.contains(auth.getAuthority()))) {
+        if (userDetails.getAuthorities().stream().anyMatch(auth -> limitedConsumers.contains(auth.getAuthority()))) {
             userRateLimiter.checkAndIncrementUserCaptchaLimit(userDetails.getUser());
-            captcha = captchaService.createCaptcha(captchaRequest.requestId(), type, "UNLIMITED_USER");
+            captcha = captchaService.createCaptcha(captchaRequest.requestId(), type, userDetails.getIp());
+        }
+        if (userDetails.getAuthorities().stream().anyMatch(auth -> unlimitedConsumers.contains(auth.getAuthority()))) {
+            captcha = captchaService.createCaptcha(captchaRequest.requestId(), type, userDetails.getIp());
         }
         if (captcha == null) {
             return ResponseEntity.status(500).body("Captcha creation failed");
         }
-        //TODO for now in url return the parsed solution
         CaptchaResponse response = new CaptchaResponse(
             captcha.getRequestId(), 
             captcha.getData()
@@ -66,7 +70,6 @@ public class CaptchaApiController {
     public ResponseEntity<?> solveCaptcha(@RequestBody SolutionResponse solutionResponse) {
         CaptchaType type = parseCaptchaType(solutionResponse.type());
         if(captchaService.verifyCaptchaSolution(solutionResponse.requestId(), type, solutionResponse.solution())) {
-            //TODO generate real token
             String token = captchaTokenService.generateCaptchaToken(solutionResponse.requestId().toString());
             return ResponseEntity.ok(new CaptchaTokenResponse(token));
         } else {
