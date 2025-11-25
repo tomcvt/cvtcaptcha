@@ -23,7 +23,7 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
     private final AnonRequestLimiter rateLimiter;
     private User anonUser;
 
-    public AnonUserAuthenticationFilter(AnonRequestLimiter rateLimiter, AnonUserInitializer anonUserInitializer) {
+    public AnonUserAuthenticationFilter(AnonRequestLimiter rateLimiter) {
         this.rateLimiter = rateLimiter;
     }
 

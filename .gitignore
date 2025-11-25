@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .env
+.env.docker
 logs/
 application-dev.yml
 storage/
