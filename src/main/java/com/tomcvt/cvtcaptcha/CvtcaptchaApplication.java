@@ -11,5 +11,4 @@ public class CvtcaptchaApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CvtcaptchaApplication.class, args);
 	}
-
 }

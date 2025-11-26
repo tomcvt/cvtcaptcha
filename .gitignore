@@ -5,10 +5,13 @@ target/
 !**/src/test/**/target/
 .env
 .env.docker
+.env.local
+.env.db
 logs/
 application-dev.yml
 storage/
 README-template.md
+cvtcaptcha.tar
 
 ### STS ###
 .apt_generated

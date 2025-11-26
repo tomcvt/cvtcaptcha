@@ -5,7 +5,7 @@
 4. be consistent in returning when exception happens (text/json) later
 5. implement custom authentication tokens (jwt, apikey) later
 
-6. for now request limiting only anon users (refactor the method)
+6. for now request limiting only anon users (refactor the method) DONE
 
 //when finished all start crafting readme
 
