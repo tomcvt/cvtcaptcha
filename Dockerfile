@@ -1,8 +1,10 @@
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 COPY mvnw pom.xml ./
+RUN ./mnvw -q -e dependency:go-offline
 COPY .mvn .mvn
 COPY src src
+RUN rm -rf ~/.m2/repository/net/bytebuddy
 RUN ./mvnw -q -e -DskipTests package
 
 FROM eclipse-temurin:17-jdk

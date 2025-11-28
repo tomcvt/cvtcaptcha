@@ -1,10 +1,15 @@
 
 /*
-usage: CaptchaModule.Captcha({
-    type: 'CLICK_IN_ORDER', 
-    onSuccess: (data) -> { ... }   //optional, called when captcha is solved, data will contain some info later
+usage: 
 
-});
+CaptchaModule.Captcha({
+    type: 'CLICK_IN_ORDER',
+    onSuccess: (data, captchaToken) => {
+        alert('Captcha solved! Data: ' + JSON.stringify(data));
+        console.log('Received Captcha Token: ', captchaToken);
+        verifyToken(captchaToken);
+    }
+}).renderInto('#captchaContainer');
 
 
 */

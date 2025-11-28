@@ -11,16 +11,19 @@ import com.tomcvt.cvtcaptcha.workers.CaptchaCleanupWorker;
 public class WorkerOrchestrator {
     private final CaptchaCleanupQueue captchaCleanupQueue;
     private final CaptchaDataRepository captchaDataRepository;
+    private final CaptchaService captchaService;
     private final String storageDir;
 
     public WorkerOrchestrator(
         CaptchaCleanupQueue captchaCleanupQueue,
         @Value("${app.captcha-dir}") String storageDir,
-            CaptchaDataRepository captchaDataRepository
+            CaptchaDataRepository captchaDataRepository,
+            CaptchaService captchaService
     ) {
         this.captchaCleanupQueue = captchaCleanupQueue;
         this.storageDir = storageDir;
         this.captchaDataRepository = captchaDataRepository;
+        this.captchaService = captchaService;
         initAndStartWorkers();
     }
 
@@ -28,6 +31,7 @@ public class WorkerOrchestrator {
         CaptchaCleanupWorker captchaCleanupWorker = new CaptchaCleanupWorker(
             captchaCleanupQueue,
             storageDir,
+            captchaService,
             captchaDataRepository
         );
         Thread cleanupThread = new Thread(captchaCleanupWorker, "Captcha-Cleanup-Worker");

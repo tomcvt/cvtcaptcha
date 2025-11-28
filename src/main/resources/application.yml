@@ -30,8 +30,8 @@ com:
   tomcvt:
     request:
       anon-rate-limit:
-        max-requests: 100
-        time-window-ms: 60000 # 1 minute
+        max-requests: 500
+        time-window-ms: 660000 # 11 minutes
       default-user-limit:
         hourly-max-requests: 60000
         daily-max-requests: 600000

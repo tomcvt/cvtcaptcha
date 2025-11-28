@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Cleanup;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomcvt.cvtcaptcha.dtos.CIOParameters;
@@ -90,5 +91,11 @@ public class CaptchaService {
             return solutionVerificationService.verifyCIOSolution(captchaData.getSolution(), solution);
         }
         return false;
+    }
+    
+    @Transactional
+
+    public void deleteCaptcha(UUID requestId) {
+        captchaDataRepository.deleteByRequestId(requestId);
     }
 }
