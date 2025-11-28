@@ -2,7 +2,6 @@ package com.tomcvt.cvtcaptcha.network;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.catalina.connector.Request;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

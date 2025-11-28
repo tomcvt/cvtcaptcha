@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.tomcvt.cvtcaptcha.auth.AuthService;
 
 @Component
-@Profile({"demo", "dev"})
+@Profile("dev")
 public class DemoUsers {
     private final AuthService authService;
 

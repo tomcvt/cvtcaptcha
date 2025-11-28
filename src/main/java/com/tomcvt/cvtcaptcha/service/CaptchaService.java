@@ -25,19 +25,22 @@ public class CaptchaService {
     private final CaptchaCleanupQueue captchaCleanupQueue;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final int captchaExpirationMillis;
+    private final String urlOrigin;
 
     public CaptchaService(SolutionGenerator solutionGenerator,
             SolutionVerificationService solutionVerificationService,
             CaptchaDataRepository captchaDataRepository,
             CaptchaImageGenerator captchaImageGenerator,
             CaptchaCleanupQueue captchaCleanupQueue,
-        @Value("${com.tomcvt.captcha.expiration-ms}") int captchaExpirationMillis) {
+        @Value("${com.tomcvt.captcha.expiration-ms}") int captchaExpirationMillis,
+        @Value("${com.tomcvt.url-origin}") String urlOrigin){
         this.solutionGenerator = solutionGenerator;
         this.solutionVerificationService = solutionVerificationService;
         this.captchaDataRepository = captchaDataRepository;
         this.captchaImageGenerator = captchaImageGenerator;
         this.captchaCleanupQueue = captchaCleanupQueue;
         this.captchaExpirationMillis = captchaExpirationMillis;
+        this.urlOrigin = urlOrigin;
     }
 
     public CaptchaData createCaptcha(UUID requestId, CaptchaType type, String userIp) {
@@ -54,7 +57,7 @@ public class CaptchaService {
             captchaData.setSolution(solution);
             File imageFile = captchaImageGenerator.generateEmojiCaptchaImage(requestId, solution);
             // TODO store in CDN or proper file storage
-            String imageData = "/captcha-images/" + imageFile.getName();
+            String imageData = "http://" + urlOrigin + "/captcha-images/" + imageFile.getName();
             fileName = imageFile.getName();
             captchaData.setData(imageData);
             int clickRadius = 36; // TODO refactor to pixel depending on config and emote size

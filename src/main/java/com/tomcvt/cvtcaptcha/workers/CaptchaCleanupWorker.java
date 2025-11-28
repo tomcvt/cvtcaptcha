@@ -63,6 +63,7 @@ public class CaptchaCleanupWorker implements Runnable {
 
     private void processTask(CaptchaCleanupTask task) {
         deleteCaptchaImage(task.requestId(), task.fileName());
+        deleteCaptchaData(task.requestId());
     }
 
     private void deleteCaptchaImage(UUID requestId, String fileName) {
@@ -77,5 +78,14 @@ public class CaptchaCleanupWorker implements Runnable {
             log.error("Failed to delete captcha image file: {}", fileName, e);
         }
         log.info("Deleted captcha image file: {}", fileName);
+    }
+
+    private void deleteCaptchaData(UUID requestId) {
+        try {
+            captchaDataRepository.deleteByRequestId(requestId);
+        } catch (Exception e) {
+            log.error("Failed to delete captcha data for requestId: {}", requestId, e);
+        }
+        log.info("Deleted captcha data for requestId: {}", requestId);
     }
 }

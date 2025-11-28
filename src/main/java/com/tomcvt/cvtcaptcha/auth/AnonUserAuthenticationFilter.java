@@ -7,7 +7,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.tomcvt.cvtcaptcha.config.AnonUserInitializer;
 import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.network.AnonRequestLimiter;
 

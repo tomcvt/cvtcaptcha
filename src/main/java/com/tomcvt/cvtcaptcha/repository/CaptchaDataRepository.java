@@ -11,4 +11,5 @@ import com.tomcvt.cvtcaptcha.model.CaptchaData;
 @Repository
 public interface CaptchaDataRepository extends JpaRepository<CaptchaData, Long> {
     Optional<CaptchaData> findByRequestId(UUID requestId);
+    void deleteByRequestId(UUID requestId);
 }
