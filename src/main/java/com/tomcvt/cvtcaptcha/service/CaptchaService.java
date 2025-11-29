@@ -58,7 +58,7 @@ public class CaptchaService {
             captchaData.setSolution(solution);
             File imageFile = captchaImageGenerator.generateEmojiCaptchaImage(requestId, solution);
             // TODO store in CDN or proper file storage
-            String imageData = "http://" + urlOrigin + "/captcha-images/" + imageFile.getName();
+            String imageData = urlOrigin + "/captcha-images/" + imageFile.getName();
             fileName = imageFile.getName();
             captchaData.setData(imageData);
             int clickRadius = 36; // TODO refactor to pixel depending on config and emote size

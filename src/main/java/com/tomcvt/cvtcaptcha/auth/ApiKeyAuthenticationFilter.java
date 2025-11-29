@@ -45,6 +45,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                 userDetails = consumerApiKeyService.authenticateApiKey(apiKey);
             } catch (IllegalArgumentException e) {
                 log.warn("Failed to authenticate API key: " + e.getMessage() + " from IP: " + ipAddress);
+                //TODO consider handling ip blocking on multiple failed attempts
                 writeErrorResponse(response, "Invalid API Key");
                 return;
             }
@@ -53,7 +54,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                     userDetails, null, userDetails.getAuthorities());
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
-            log.info("Authenticated API key for user: " + userDetails.getUsername());
+            log.info("Authenticated API key for user: {}, with IP: {}", userDetails.getUsername(), ipAddress);
 
         }
 

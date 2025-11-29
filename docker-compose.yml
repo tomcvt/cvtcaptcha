@@ -4,7 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: cvtcaptcha:latest
+      args:
+        APP_VERSION: ${APP_VERSION}
+    image: cvtcaptcha:${APP_VERSION}
     ports:
       - "8080:8080"
     env_file:
