@@ -13,6 +13,7 @@ import com.tomcvt.cvtcaptcha.service.HmacHashService;
 
 @Service
 public class SuperUserInitializer {
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SuperUserInitializer.class);
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final HmacHashService hmacHashService;
@@ -43,6 +44,7 @@ public class SuperUserInitializer {
     public void init() {
         var superUserOpt = userRepository.findByUsername(superUsername);
         if (superUserOpt.isPresent()) {
+            log.info("Superuser already exists, skipping creation.");
             return;
         }
         User superUser = null;

@@ -61,7 +61,7 @@ com:
     url-origin: ${URL_ORIGIN}
 
 app:
-  domain: https://captcha.tomcvt.pl
+  domain: ${URL_ORIGIN}
   captcha-dir: storage
   image:
     width: 400
