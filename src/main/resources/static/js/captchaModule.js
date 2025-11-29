@@ -4,6 +4,9 @@ usage:
 
 CaptchaModule.Captcha({
     type: 'CLICK_IN_ORDER',
+    createEndpoint: '/api/captcha/create',
+    solveEndpoint: '/api/captcha/solve',
+    domainOrigin: 'yourdomain.com',
     onSuccess: (data, captchaToken) => {
         alert('Captcha solved! Data: ' + JSON.stringify(data));
         console.log('Received Captcha Token: ', captchaToken);
@@ -24,13 +27,19 @@ const CaptchaModule = {
         let markers = [];
         let markerElements = [];
         let doOnSuccess = null;
+        let createEndpoint = config.createEndpoint ? config.createEndpoint : '/api/captcha/create';
+        let solveEndpoint = config.solveEndpoint ? config.solveEndpoint : '/api/captcha/solve';
+        let domainOrigin = config.domainOrigin ? config.domainOrigin : 'https://captcha.tomcvt.pl'; //to change later
         let requestId = "00000000-0000-0000-0000-000000000000";
         if (!config || !config.type) {
             throw new Error('Captcha type is required in config');
         }
+        if (config.type !== 'CLICK_IN_ORDER') {
+            throw new Error('Unsupported captcha type: ' + config.type);
+        }
 
         const fetchCaptcha = (async () => {
-            const response = await fetch('/api/captcha/create', {
+            const response = await fetch(`${domainOrigin}${createEndpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -47,7 +56,7 @@ const CaptchaModule = {
         })();
 
         const verifyCaptcha = async (solution) => {
-            const response = await fetch('/api/captcha/solve', {
+            const response = await fetch(`${domainOrigin}${solveEndpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

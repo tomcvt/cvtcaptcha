@@ -42,6 +42,9 @@ public class SuperUserInitializer {
 
     public void init() {
         var superUserOpt = userRepository.findByUsername(superUsername);
+        if (superUserOpt.isPresent()) {
+            return;
+        }
         User superUser = null;
         if (superUserOpt.isEmpty()) {
             superUser = new User();

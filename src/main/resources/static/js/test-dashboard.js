@@ -4,6 +4,9 @@ import CaptchaModule from '/js/captchaModule.js';
 
 CaptchaModule.Captcha({
     type: 'CLICK_IN_ORDER',
+    createEndpoint: '/api/captcha/create',
+    solveEndpoint: '/api/captcha/solve',
+    domainOrigin: window.location.origin,
     onSuccess: (data, captchaToken) => {
         alert('Captcha solved! Data: ' + JSON.stringify(data));
         console.log('Received Captcha Token: ', captchaToken);

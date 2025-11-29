@@ -35,6 +35,9 @@
             verifyTokenBtn.disabled = true;
             CaptchaModule.Captcha({
                 type: 'CLICK_IN_ORDER',
+                createEndpoint: '/api/captcha/create',
+                solveEndpoint: '/api/captcha/solve',
+                domainOrigin: window.location.origin,
                 onSuccess: (data, token) => {
                     alert('Captcha solved! Token: ' + token);
                     captchaToken = token;

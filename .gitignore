@@ -12,7 +12,8 @@ application-dev.yml
 storage/
 README-template.md
 cvtcaptcha.tar
-
+cvtcaptchaimage.*
+cvtcaptchav2.tar
 ### STS ###
 .apt_generated
 .classpath

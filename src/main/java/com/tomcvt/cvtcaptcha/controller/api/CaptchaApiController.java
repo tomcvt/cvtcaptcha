@@ -1,6 +1,7 @@
 package com.tomcvt.cvtcaptcha.controller.api;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,6 +13,7 @@ import com.tomcvt.cvtcaptcha.dtos.CaptchaResponse;
 import com.tomcvt.cvtcaptcha.dtos.CaptchaTokenResponse;
 import com.tomcvt.cvtcaptcha.dtos.ErrorResponse;
 import com.tomcvt.cvtcaptcha.dtos.SolutionResponse;
+import com.tomcvt.cvtcaptcha.dtos.VerificationResponse;
 import com.tomcvt.cvtcaptcha.enums.CaptchaType;
 import com.tomcvt.cvtcaptcha.exceptions.WrongTypeException;
 import com.tomcvt.cvtcaptcha.model.CaptchaData;
@@ -19,6 +21,8 @@ import com.tomcvt.cvtcaptcha.network.CaptchaRateLimiter;
 import com.tomcvt.cvtcaptcha.network.UserRateLimiter;
 import com.tomcvt.cvtcaptcha.service.CaptchaService;
 import com.tomcvt.cvtcaptcha.service.CaptchaTokenService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/captcha")
@@ -76,12 +80,21 @@ public class CaptchaApiController {
             return ResponseEntity.status(400).body(new ErrorResponse("WRONG_SOLUTION", "The provided solution is incorrect."));
         }
     }
-
+    //TODO refactor responses
     @GetMapping("/verify")
-    public ResponseEntity<?> verifyCaptcha(@RequestParam String token) {
-        String requestId = captchaTokenService.validateCaptchaToken(token);
+    public ResponseEntity<?> verifyCaptcha(@RequestParam(required = false) String token, HttpServletRequest request) {
+        String tokenH = request.getHeader("X-Captcha-Token");
+        if (tokenH != null && !tokenH.isEmpty()) {
+            token = tokenH;
+        }
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.status(400).body(new ErrorResponse("MISSING_TOKEN", "Captcha token is required for verification."));
+        }
+        UUID requestId = UUID.fromString(captchaTokenService.validateCaptchaToken(token));
+        var response = new VerificationResponse(requestId, true);
+        // error throwed returns 401 and error json
         //TODO decide on what o return
-        return ResponseEntity.ok().body("Captcha verified for requestId: " + requestId);
+        return ResponseEntity.ok().body(response);
     }
 
     private CaptchaType parseCaptchaType(String typeStr) {
