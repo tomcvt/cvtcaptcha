@@ -44,4 +44,16 @@ public class LoginController {
         // TODO: better redirect
         return "redirect:/";
     }
+    @PostMapping("/logout")
+    public String processLogout(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(0)
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+        return "redirect:/login?logout";
+    }
+    
 }

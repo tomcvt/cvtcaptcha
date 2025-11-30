@@ -51,7 +51,8 @@ public class SuperUserInitializer {
         if (superUserOpt.isEmpty()) {
             superUser = new User();
             superUser.setUsername(superUsername);
-            superUser.setPassword(passwordEncoder.encode(superPassword));
+            String encodedPassword = passwordEncoder.encode(superPassword);
+            superUser.setPassword(encodedPassword);
             superUser.setEmail("");
             superUser.setRole("SUPERUSER");
             superUser.setEnabled(true);
