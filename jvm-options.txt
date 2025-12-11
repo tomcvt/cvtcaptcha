@@ -1,0 +1,7 @@
+-Xms256m
+-Xmx1g
+-XX:+UseG1GC
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/app/logs/heapdump.hprof
+-XX:ErrorFile=/app/logs/hs_err_pid%p.log
+-Xlog:gc*:file=/app/logs/gc.log:time,uptime,level,tags:filecount=5,filesize=10M

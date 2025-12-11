@@ -35,7 +35,9 @@ com:
     request:
       anon-rate-limit:
         max-requests: 500
-        time-window-ms: 660000 # 11 minutes
+        time-window-ms: 600000 # 10 minutes
+        ban-rate-per-minute: 120
+        ban-duration-ms: 7200000 # 2 hours
       default-user-limit:
         hourly-max-requests: 60000
         daily-max-requests: 600000

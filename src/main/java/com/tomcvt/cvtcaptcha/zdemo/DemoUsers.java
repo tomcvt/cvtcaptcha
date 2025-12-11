@@ -24,8 +24,8 @@ public class DemoUsers {
             log.info("Demo profile active - not creating dev users");
             return;
         }
-        authService.registerActivatedUser("anonymous", "", "", "ANON");
-        authService.registerActivatedUser("admin", "123", "abc@gmail.com", "ADMIN");
-        authService.registerActivatedUser("user", "123", "abe@gmail.com", "USER");
+        //authService.registerActivatedUser("anonymous", "", "", "ANON");
+        //authService.registerActivatedUser("admin", "123", "abc@gmail.com", "ADMIN");
+        //authService.registerActivatedUser("user", "123", "abe@gmail.com", "USER");
     }
 }

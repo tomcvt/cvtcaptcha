@@ -32,6 +32,7 @@ public class CorsConfig {
         source.registerCorsConfiguration("/api/internal/**", internal);
         source.registerCorsConfiguration("/api/auth/**", internal);
         source.registerCorsConfiguration("/login", internal);
+        source.registerCorsConfiguration("/logout", internal);
 
         // 2) Public client CAPTCHA usage (no cookies)
         CorsConfiguration publicConf = new CorsConfiguration();

@@ -7,8 +7,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.tomcvt.cvtcaptcha.exceptions.IllegalUsageException;
+import com.tomcvt.cvtcaptcha.exceptions.RateLimitExceededException;
 import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.network.AnonRequestLimiter;
+import com.tomcvt.cvtcaptcha.network.BanRegistry;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,10 +23,12 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
     
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AnonUserAuthenticationFilter.class);
     private final AnonRequestLimiter rateLimiter;
+    private final BanRegistry banRegistry;
     private User anonUser;
 
-    public AnonUserAuthenticationFilter(AnonRequestLimiter rateLimiter) {
+    public AnonUserAuthenticationFilter(AnonRequestLimiter rateLimiter, BanRegistry banRegistry) {
         this.rateLimiter = rateLimiter;
+        this.banRegistry = banRegistry;
     }
 
     public void setAnonUser(User anonUser) {
@@ -42,6 +47,10 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 ipAddress = request.getRemoteAddr();
             }
+            if (banRegistry.isIPBanned(ipAddress)) {
+                response.sendError(403, "IP address is banned due to illegal usage");
+                return;
+            }
             SecureUserDetails anonUserDetails = new SecureUserDetails(false, anonUser, ipAddress);
             var authToken = new UsernamePasswordAuthenticationToken(
                     anonUserDetails, null, anonUserDetails.getAuthorities());
@@ -50,8 +59,12 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             try {
                 //TODO change to anon rate limiter
                 rateLimiter.checkRateLimitAndIncrement(ipAddress);
-            } catch (Exception e) {
+            } catch (RateLimitExceededException e) {
                 response.sendError(429, "Rate limit exceeded");
+                return;
+            } catch (IllegalUsageException e) {
+                banRegistry.banIP(ipAddress);
+                response.sendError(400, "Illegal usage detected");
                 return;
             }
         }
