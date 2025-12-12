@@ -51,6 +51,12 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
                 response.sendError(403, "IP address is banned due to illegal usage");
                 return;
             }
+            if (banRegistry.isRequestIllegal(request.getRequestURI())) {
+                banRegistry.banIP(ipAddress, 600); // Ban for 10 hours
+                log.warn("Illegal request detected from IP: " + ipAddress + ". IP has been banned.");
+                response.sendError(403, "Illegal usage detected");
+                return;
+            }
             SecureUserDetails anonUserDetails = new SecureUserDetails(false, anonUser, ipAddress);
             var authToken = new UsernamePasswordAuthenticationToken(
                     anonUserDetails, null, anonUserDetails.getAuthorities());
@@ -60,10 +66,12 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
                 //TODO change to anon rate limiter
                 rateLimiter.checkRateLimitAndIncrement(ipAddress);
             } catch (RateLimitExceededException e) {
+                log.warn("Standard rate limit exceeded for IP: " + ipAddress);
                 response.sendError(429, "Rate limit exceeded");
                 return;
             } catch (IllegalUsageException e) {
                 banRegistry.banIP(ipAddress);
+                log.warn("Illegal usage detected from IP: " + ipAddress + ". IP has been banned.");
                 response.sendError(403, "Illegal usage detected");
                 return;
             }

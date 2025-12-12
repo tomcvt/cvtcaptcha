@@ -1,5 +1,6 @@
 package com.tomcvt.cvtcaptcha.network;
 
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;

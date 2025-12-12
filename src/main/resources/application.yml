@@ -71,3 +71,9 @@ app:
     width: 400
     height: 300
     emote-r: 36
+
+firewall:
+  illegal-request-strings:
+    - ".git"
+    - ".config"
+    - ".env"
