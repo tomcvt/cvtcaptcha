@@ -18,8 +18,7 @@ RUN ./mvnw -q -e -DskipTests package
 FROM eclipse-temurin:17-jdk
 ARG APP_VERSION=dev
 ENV APP_VERSION=${APP_VERSION}
-ARG SPRING_PROFILES_ACTIVE=prod
-ENV JAVA_TOOL_OPTIONS="-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}"
+ENV SPRING_PROFILES_ACTIVE=prod
 
 WORKDIR /app
 COPY --from=build /app/target/cvtcaptcha-${APP_VERSION}.jar cvtcaptcha.jar
@@ -30,4 +29,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 EXPOSE 8080
-ENTRYPOINT ["java", "@/jvm-options.txt" "-jar", "cvtcaptcha.jar"]
+ENTRYPOINT ["sh", "-c", "java @jvm-options.txt -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -jar cvtcaptcha.jar"]

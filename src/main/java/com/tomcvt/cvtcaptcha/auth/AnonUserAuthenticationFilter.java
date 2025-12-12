@@ -64,7 +64,7 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
                 return;
             } catch (IllegalUsageException e) {
                 banRegistry.banIP(ipAddress);
-                response.sendError(400, "Illegal usage detected");
+                response.sendError(403, "Illegal usage detected");
                 return;
             }
         }

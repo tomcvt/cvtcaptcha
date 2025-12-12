@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Logging Filter Dashboard</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 2em; }
+		h1 { color: #333; }
+		.filters { margin-bottom: 2em; }
+		table { border-collapse: collapse; width: 100%; margin-bottom: 1em; }
+		th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
+		th { background: #f0f0f0; }
+		.actions { margin-top: 1em; }
+		input[type="text"] { padding: 0.3em; }
+		button { padding: 0.3em 1em; }
+		.success { color: green; }
+		.error { color: red; }
+	</style>
+</head>
+<body>
+	<h1>Logging Filter Dashboard</h1>
+	<div class="filters">
+		<h2>Current Filters</h2>
+		<div id="filters-container">Loading...</div>
+	</div>
+
+	<div class="actions">
+		<h2>Add Blocked Substring to Filter</h2>
+		<form id="add-to-filter-form">
+			<label>Filter Key:
+				<input type="text" id="filterKeyInput" required>
+			</label>
+			<label>Substring:
+				<input type="text" id="substringInput" required>
+			</label>
+			<button type="submit">Add</button>
+		</form>
+
+		<h2>Add Blocked Substring to All Filters</h2>
+		<form id="add-to-all-form">
+			<label>Substring:
+				<input type="text" id="substringAllInput" required>
+			</label>
+			<button type="submit">Add to All</button>
+		</form>
+
+		<h2>Remove Blocked Substring from All Filters</h2>
+		<form id="remove-from-all-form">
+			<label>Substring:
+				<input type="text" id="removeSubstringAllInput" required>
+			</label>
+			<button type="submit">Remove from All</button>
+		</form>
+		<div id="message"></div>
+	</div>
+
+	<script>
+		async function fetchFilters() {
+			const container = document.getElementById('filters-container');
+			container.textContent = 'Loading...';
+			try {
+				const res = await fetch('/api/logging/filters');
+				if (!res.ok) throw new Error('Failed to fetch filters');
+				const data = await res.json();
+				if (Object.keys(data).length === 0) {
+					container.textContent = 'No filters registered.';
+					return;
+				}
+				let html = '<table><tr><th>Filter Key</th><th>Blocked Substrings</th></tr>';
+				for (const [key, substrings] of Object.entries(data)) {
+					html += `<tr><td>${key}</td><td>${substrings.map(s => `<code>${s}</code>`).join(', ') || '<em>None</em>'}</td></tr>`;
+				}
+				html += '</table>';
+				container.innerHTML = html;
+			} catch (e) {
+				container.innerHTML = `<span class="error">${e.message}</span>`;
+			}
+		}
+
+		function showMessage(msg, isError = false) {
+			const el = document.getElementById('message');
+			el.textContent = msg;
+			el.className = isError ? 'error' : 'success';
+			setTimeout(() => { el.textContent = ''; }, 2500);
+		}
+
+		document.getElementById('add-to-filter-form').addEventListener('submit', async e => {
+			e.preventDefault();
+			const filterKey = document.getElementById('filterKeyInput').value.trim();
+			const substring = document.getElementById('substringInput').value.trim();
+			if (!filterKey || !substring) return;
+			try {
+				const res = await fetch(`/api/logging/filters/add?filterKey=${encodeURIComponent(filterKey)}&substring=${encodeURIComponent(substring)}`, { method: 'POST' });
+				if (!res.ok) throw new Error('Failed to add substring');
+				showMessage('Added to filter.');
+				fetchFilters();
+			} catch (e) {
+				showMessage(e.message, true);
+			}
+		});
+
+		document.getElementById('add-to-all-form').addEventListener('submit', async e => {
+			e.preventDefault();
+			const substring = document.getElementById('substringAllInput').value.trim();
+			if (!substring) return;
+			try {
+				const res = await fetch(`/api/logging/filters/add-all?substring=${encodeURIComponent(substring)}`, { method: 'POST' });
+				if (!res.ok) throw new Error('Failed to add substring to all');
+				showMessage('Added to all filters.');
+				fetchFilters();
+			} catch (e) {
+				showMessage(e.message, true);
+			}
+		});
+
+		document.getElementById('remove-from-all-form').addEventListener('submit', async e => {
+			e.preventDefault();
+			const substring = document.getElementById('removeSubstringAllInput').value.trim();
+			if (!substring) return;
+			try {
+				const res = await fetch('/api/logging/filters/remove-all', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(substring)
+				});
+				if (!res.ok) throw new Error('Failed to remove substring from all');
+				showMessage('Removed from all filters.');
+				fetchFilters();
+			} catch (e) {
+				showMessage(e.message, true);
+			}
+		});
+
+		// Initial load
+		fetchFilters();
+	</script>
+</body>
+</html>

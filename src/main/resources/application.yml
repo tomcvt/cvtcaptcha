@@ -7,7 +7,6 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,11 +15,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-
   security:
     jwt:
       secret-key: ${JWT_SECRET_KEY}
       expiration-ms: 3600000
+  devtools:
+    restart:
+      enabled: false
 
 server:
   port: 8080

@@ -14,7 +14,7 @@ import com.tomcvt.cvtcaptcha.service.ConsumerApiKeyService;
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN','SUPERUSER')")
+@PreAuthorize("hasAnyRole('ADMIN','SUPERUSER')")
 public class AdminApiController {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminApiController.class);
     private final ConsumerApiKeyService consumerApiKeyService;

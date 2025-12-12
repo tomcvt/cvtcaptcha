@@ -9,13 +9,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.tomcvt.cvtcaptcha.auth.SecureUserDetails;
 
+
 @Controller
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN','SUPERUSER')")
 public class AdminController {
     @GetMapping("/dashboard")
     public String getAdminDashboard(@AuthenticationPrincipal SecureUserDetails userDetails, Model model) {
         model.addAttribute("username", userDetails.getUsername());
         return "admin/admin-dashboard";
     }
+    @GetMapping("/logging")
+    public String getLoggingDashboard() {
+        return "admin/logging-dashboard";
+    }
+    
 }

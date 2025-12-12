@@ -11,7 +11,7 @@ public class BanRegistry {
     private final Map<String, Long> bannedIPs = new ConcurrentHashMap<>();
     private final long banDurationMillis;
 
-    public BanRegistry(@Value("{com.tomcvt.request.anon-rate-limit.ban-duration-ms}") long banDurationMillis) {
+    public BanRegistry(@Value("${com.tomcvt.request.anon-rate-limit.ban-duration-ms}") long banDurationMillis) {
         this.banDurationMillis = banDurationMillis;
     }
 
