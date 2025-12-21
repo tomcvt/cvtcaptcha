@@ -33,7 +33,7 @@ public class AppReadyInitializer implements ApplicationListener<ApplicationReady
         anonUserInitializer.init();
         superUserInitializer.init();
         anonUserAuthenticationFilter.setAnonUser(anonUserInitializer.getAnonUser());
-        loggingFilterRegistry.registerFilters();
+        //loggingFilterRegistry.registerFilters();
     }
 
 }

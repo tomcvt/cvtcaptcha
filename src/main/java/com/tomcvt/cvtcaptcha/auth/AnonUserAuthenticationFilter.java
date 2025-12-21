@@ -61,6 +61,10 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             var authToken = new UsernamePasswordAuthenticationToken(
                     anonUserDetails, null, anonUserDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (ipAddress.equals("0:0:0:0:0:0:0:1")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             log.info("Authenticated anonymous user with IP: " + ipAddress);
             try {
                 //TODO change to anon rate limiter

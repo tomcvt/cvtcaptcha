@@ -59,4 +59,8 @@ public class BanRegistry {
         long banExpiryTime = System.currentTimeMillis() + banDurationMinutes * 60 * 1000;
         bannedIPs.put(ipAddress, banExpiryTime);
     }
+
+    public Map<String, Long> getBannedIPs() {
+        return bannedIPs;
+    }
 }

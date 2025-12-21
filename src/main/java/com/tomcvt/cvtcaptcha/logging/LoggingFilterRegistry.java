@@ -3,19 +3,25 @@ package com.tomcvt.cvtcaptcha.logging;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.spi.FilterAttachable;
-import jakarta.annotation.PostConstruct;
 
 @Service
-public class LoggingFilterRegistry {
+public class LoggingFilterRegistry implements ApplicationListener<ApplicationReadyEvent> {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoggingFilterRegistry.class);
     private final Map<String, StringBlockFilter> filters = new HashMap<>();
+
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        registerFilters();
+    }
 
     public void registerFilters() {
         LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
