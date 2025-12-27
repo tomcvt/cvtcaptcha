@@ -1,6 +1,5 @@
 package com.tomcvt.cvtcaptcha.network;
 
-import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -45,20 +44,22 @@ public class AnonRequestLimiter {
         long currentTimeMillis = System.currentTimeMillis();
         requestCounts.compute(key, (k, counter) -> {
             if (counter == null) {
-                return new RequestCounter(currentTimeMillis);
+                return new RequestCounter();
             } else {
                 if (currentTimeMillis - counter.getWindowStartMillis() > resetMilillis) {
-                    counter.reset(currentTimeMillis);
-                } else {
-                    counter.increment();
+                    counter.resetCounter();
                 }
+                if (currentTimeMillis - counter.getBanWindowStartMillis() > 60000) {
+                    counter.resetBanCounter();
+                }
+                counter.increment();
                 return counter;
             }
         });
 
         RequestCounter counter = requestCounts.get(key);
-        if (currentTimeMillis - counter.getWindowStartMillis() <= 60000 && counter.getCount() > banRatePerMinute) {
-            throw new IllegalUsageException("Excessive request rate detected for key: " + key);
+        if (counter.getBanCount() > banRatePerMinute) {
+            throw new IllegalUsageException("Excessive requests detected for key: " + key);
         }
         if (counter.getCount() > maxRequests) {
             throw new RateLimitExceededException("Rate limit exceeded for key: " + key);

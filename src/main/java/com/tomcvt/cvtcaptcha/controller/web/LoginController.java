@@ -8,6 +8,7 @@ import com.tomcvt.cvtcaptcha.auth.DisabledLoginRegistry;
 import com.tomcvt.cvtcaptcha.auth.JwtResponse;
 import com.tomcvt.cvtcaptcha.dtos.LoginRequest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
@@ -27,13 +28,18 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String processLogin(@RequestBody LoginRequest loginRequest, 
+    public String processLogin(@RequestBody LoginRequest loginRequest, HttpServletRequest request,
                                 HttpServletResponse response
     ) {
         if (disabledLoginRegistry.isLoginDisabled(loginRequest.username())) {
             throw new IllegalArgumentException("This login method is disabled for this user");
         }
-        JwtResponse jwtResponse = authService.authenticate(loginRequest.username(), loginRequest.password());
+        String clientIp = request.getRemoteAddr();
+        String xff = request.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isEmpty()) {
+            clientIp = xff.split(",")[0].trim();
+        }
+        JwtResponse jwtResponse = authService.authenticate(loginRequest.username(), loginRequest.password(), clientIp);
         ResponseCookie cookie = ResponseCookie.from("jwt", jwtResponse.token())
                 .httpOnly(true)
                 .path("/")

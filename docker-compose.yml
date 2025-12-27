@@ -4,7 +4,7 @@ services:
     container_name: cvtcaptcha
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile2
       args:
         APP_VERSION: ${APP_VERSION}
     image: cvtcaptcha:${APP_VERSION}

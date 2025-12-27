@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,19 +25,25 @@ public class GlobalExceptionHandler {
         );
     }
     @ExceptionHandler(CaptchaLimitExceededException.class)
-    public ResponseEntity<String> handleCaptchaLimitExceededException(CaptchaLimitExceededException ex) {
+    public ResponseEntity<ErrorResponse> handleCaptchaLimitExceededException(CaptchaLimitExceededException ex) {
         log.warn("CaptchaLimitExceededException: " + ex.getMessage());
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(
+            new ErrorResponse("CAPTCHA_LIMIT_EXCEEDED", ex.getMessage())
+        );
     }
     @ExceptionHandler(RequestLimitExceededException.class)
-    public ResponseEntity<String> handleRequestLimitExceededException(RequestLimitExceededException ex) {
+    public ResponseEntity<ErrorResponse> handleRequestLimitExceededException(RequestLimitExceededException ex) {
         log.warn("RequestLimitExceededException: " + ex.getMessage());
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(
+            new ErrorResponse("REQUEST_LIMIT_EXCEEDED", ex.getMessage())
+        );
     }
     @ExceptionHandler(WrongTypeException.class)
-    public ResponseEntity<String> handleWrongTypeException(WrongTypeException ex) {
+    public ResponseEntity<ErrorResponse> handleWrongTypeException(WrongTypeException ex) {
         log.warn("WrongTypeException: " + ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            new ErrorResponse("WRONG_TYPE", ex.getMessage())
+        );
     }
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException ex) {
@@ -46,24 +53,32 @@ public class GlobalExceptionHandler {
         );
     }
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<String> handleNoResourceFoundException(NoResourceFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException ex) {
         log.warn("NoResourceFoundException: " + ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+            new ErrorResponse("NO_RESOURCE_FOUND", "Resource not found")
+        );
     }
     @ExceptionHandler(ExpiredCaptchaException.class)
-    public ResponseEntity<String> handleExpiredCaptchaException(ExpiredCaptchaException ex) {
+    public ResponseEntity<ErrorResponse> handleExpiredCaptchaException(ExpiredCaptchaException ex) {
         log.warn("ExpiredCaptchaException: " + ex.getMessage());
-        return ResponseEntity.status(HttpStatus.GONE).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.GONE).body(
+            new ErrorResponse("EXPIRED_CAPTCHA", ex.getMessage())
+        );
     }
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
         log.warn("IllegalArgumentException: " + ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            new ErrorResponse("ILLEGAL_ARGUMENT", ex.getMessage())
+        );
     }
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<String> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
         log.warn("AuthorizationDeniedException: " + ex.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authorization denied");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+            new ErrorResponse("AUTHORIZATION_DENIED", "Authorization denied")
+        );
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
@@ -77,6 +92,20 @@ public class GlobalExceptionHandler {
         log.warn("HttpRequestMethodNotSupportedException: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
             new ErrorResponse("METHOD_NOT_ALLOWED", ex.getMessage())
+        );
+    }
+    @ExceptionHandler(RequestRejectedException.class)
+    public ResponseEntity<ErrorResponse> handleRequestRejectedException(RequestRejectedException ex) {
+        log.warn("RequestRejectedException: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            new ErrorResponse("REQUEST_REJECTED", ex.getMessage())
+        );
+    }
+    @ExceptionHandler(IllegalUsageException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalUsageException(IllegalUsageException ex) {
+        log.warn("IllegalUsageException: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(
+            new ErrorResponse("ILLEGAL_USAGE", ex.getMessage())
         );
     }
 }

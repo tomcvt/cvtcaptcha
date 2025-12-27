@@ -9,7 +9,7 @@ import com.tomcvt.cvtcaptcha.exceptions.CaptchaLimitExceededException;
 
 @Service
 public class CaptchaRateLimiter {
-    private final ConcurrentHashMap<String, RequestCounter> captchaRequestsCounter = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, SimpleRequestCounter> captchaRequestsCounter = new ConcurrentHashMap<>();
     private final long resetMilillis;
     private final int maxRequests;
 
@@ -23,10 +23,10 @@ public class CaptchaRateLimiter {
         long currentTimeMillis = System.currentTimeMillis();
         captchaRequestsCounter.compute(ip, (k, counter) -> {
             if (counter == null) {
-                return new RequestCounter(currentTimeMillis);
+                return new SimpleRequestCounter();
             } else {
                 if (currentTimeMillis - counter.getWindowStartMillis() > resetMilillis) {
-                    counter.reset(currentTimeMillis);
+                    counter.resetCounter();
                 } else {
                     counter.increment();
                 }

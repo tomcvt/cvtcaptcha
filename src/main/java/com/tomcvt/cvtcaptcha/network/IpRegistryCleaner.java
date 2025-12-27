@@ -27,7 +27,7 @@ public class IpRegistryCleaner {
         }
         long currentTimeMillis = System.currentTimeMillis();
         anonRequestLimiter.requestCounts.entrySet().removeIf(entry -> 
-            currentTimeMillis - entry.getValue().getLastRequestMillis() > anonRequestLimiter.resetMilillis
+            currentTimeMillis - entry.getValue().getWindowStartMillis() > anonRequestLimiter.resetMilillis
         );
     }
 }
