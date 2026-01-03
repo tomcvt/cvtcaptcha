@@ -15,10 +15,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  security:
-    jwt:
-      secret-key: ${JWT_SECRET_KEY}
-      expiration-ms: 3600000
   devtools:
     restart:
       enabled: false
@@ -29,12 +25,9 @@ spring:
           include: health,info
 
 server:
-  port: 8080
-  address: 0.0.0.0
+  port: ${SERVER_PORT}
+  address: ${SERVER_ADDRESS}
   forward-headers-strategy: framework
-
-cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
 com:
   tomcvt:
@@ -58,16 +51,23 @@ com:
         daily-max-requests: 10000
       expiration-ms: 300000 # 5 minutes
       max-attempts: 3
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration-ms: 3600000 # 1 hour
     cvt-token:
       secret: ${CVT_TOKEN_SECRET}
       expiration-ms: 600000 # 10 minutes
     hmac-hash-service:
       secret: ${API_KEY_GENERATOR_SECRET}
+      api-key-version: ${API_KEY_VERSION}
     superuser:
       username: ${SUPERUSER_USERNAME}
       password: ${SUPERUSER_PASSWORD}
       api-key: ${SUPERUSER_API_KEY}
+      api-key-version: ${SUPERUSER_API_KEY_VERSION}
     url-origin: ${URL_ORIGIN}
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
 app:
   domain: ${URL_ORIGIN}

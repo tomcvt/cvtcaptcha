@@ -20,10 +20,13 @@ public class JwtService {
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
     private final SecretKey key;
     private final JwtParser jwtParser;
+    private final long expirationMs;
 
-    public JwtService(@Value("${spring.security.jwt.secret-key}") String SECRET_KEY) {
+    public JwtService(@Value("${com.tomcvt.cvt-token.secret}") String SECRET_KEY,
+                      @Value("${com.tomcvt.jwt.expiration-ms}") long expirationMs) {
         this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
         this.jwtParser = Jwts.parser().verifyWith(key).build();
+        this.expirationMs = expirationMs;
     }
 
 
@@ -32,7 +35,7 @@ public class JwtService {
             .subject(userDetails.getUsername())
             .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
             .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
+            .expiration(new Date(System.currentTimeMillis() + expirationMs))
             .signWith(key)
             .compact();
     }

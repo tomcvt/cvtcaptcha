@@ -1,5 +1,6 @@
 package com.tomcvt.cvtcaptcha.config;
 
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties.Web;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.tomcvt.cvtcaptcha.auth.SecureUserDetailsService;
+import com.tomcvt.cvtcaptcha.auth.WebIpAuthenticationDetails;
 
 @Configuration
 public class AuthConfig {
@@ -29,6 +31,4 @@ public class AuthConfig {
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
-
-
 }

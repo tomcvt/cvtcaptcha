@@ -5,12 +5,17 @@ import java.util.UUID;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "consumer_api_keys")
+@Table(name = "consumer_api_keys", indexes = {
+    @Index(name = "idx_consumer_api_key_hash", columnList = "apiKeyHash"),
+    @Index(name = "idx_consumer_api_key_user_id", columnList = "user_id")
+})
 public class ConsumerApiKeyData {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String apiKeyHash;
+    private String apiKeyVersion;
+    private String label;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -29,6 +34,18 @@ public class ConsumerApiKeyData {
     }
     public void setApiKeyHash(String apiKeyHash) {
         this.apiKeyHash = apiKeyHash;
+    }
+    public String getApiKeyVersion() {
+        return apiKeyVersion;
+    }
+    public void setApiKeyVersion(String apiKeyVersion) {
+        this.apiKeyVersion = apiKeyVersion;
+    }
+    public String getLabel() {
+        return label;
+    }
+    public void setLabel(String label) {
+        this.label = label;
     }
     public User getUser() {
         return user;

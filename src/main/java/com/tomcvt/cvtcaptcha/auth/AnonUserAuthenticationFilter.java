@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
-    
+
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AnonUserAuthenticationFilter.class);
     private final AnonRequestLimiter rateLimiter;
     private final BanRegistry banRegistry;
@@ -35,7 +35,6 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
         this.anonUser = anonUser;
     }
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -43,7 +42,7 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             String xff = request.getHeader("X-Forwarded-For");
             String ipAddress;
             if (xff != null && !xff.isEmpty()) {
-            ipAddress = request.getHeader("X-Forwarded-For").split(",")[0].trim();
+                ipAddress = request.getHeader("X-Forwarded-For").split(",")[0].trim();
             } else {
                 ipAddress = request.getRemoteAddr();
             }
@@ -67,7 +66,7 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
             }
             log.info("Authenticated anonymous user with IP: " + ipAddress);
             try {
-                //TODO change to anon rate limiter
+                // TODO change to anon rate limiter
                 rateLimiter.checkRateLimitAndIncrement(ipAddress);
             } catch (RateLimitExceededException e) {
                 log.warn("Standard rate limit exceeded for IP: " + ipAddress);
@@ -82,5 +81,5 @@ public class AnonUserAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
-    
+
 }

@@ -1,8 +1,7 @@
 package com.tomcvt.cvtcaptcha.config;
 
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tomcvt.cvtcaptcha.model.User;
 import com.tomcvt.cvtcaptcha.repository.UserRepository;
@@ -19,6 +18,7 @@ public class AnonUserInitializer {
         return anonUser;
     }
 
+    @Transactional
     public void init() {
         var anonUserOpt = userRepository.findByUsername("anonymous");
         if (anonUserOpt.isPresent()) {

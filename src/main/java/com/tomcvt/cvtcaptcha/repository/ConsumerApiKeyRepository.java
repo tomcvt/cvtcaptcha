@@ -1,5 +1,6 @@
 package com.tomcvt.cvtcaptcha.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,5 +11,6 @@ import com.tomcvt.cvtcaptcha.model.ConsumerApiKeyData;
 
 @Repository
 public interface ConsumerApiKeyRepository extends JpaRepository<ConsumerApiKeyData, UUID> {
-    Optional<ConsumerApiKeyData> findByApiKeyHash(String apiKeyHash);   
+    Optional<ConsumerApiKeyData> findByApiKeyHash(String apiKeyHash);
+    List<ConsumerApiKeyData> findByUserId(Long userId);
 }

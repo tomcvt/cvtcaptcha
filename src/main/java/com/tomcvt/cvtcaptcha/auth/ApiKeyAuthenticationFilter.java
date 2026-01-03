@@ -2,12 +2,14 @@ package com.tomcvt.cvtcaptcha.auth;
 
 import java.io.IOException;
 
+import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.tomcvt.cvtcaptcha.config.WebIpAuthenticationDetailsSource;
 import com.tomcvt.cvtcaptcha.service.ConsumerApiKeyService;
 
 import jakarta.servlet.FilterChain;
@@ -40,22 +42,21 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                 ipAddress = request.getRemoteAddr();
             }
 
-            SecureUserDetails userDetails = null;
+            CachedUserDetails userDetails = null;
             try {
-                userDetails = consumerApiKeyService.authenticateApiKey(apiKey);
-            } catch (IllegalArgumentException e) {
+                userDetails = consumerApiKeyService.authenticate(apiKey);
+            } catch (AuthenticationException e) {
                 log.warn("Failed to authenticate API key: " + e.getMessage() + " from IP: " + ipAddress);
                 //TODO consider handling ip blocking on multiple failed attempts
-                writeErrorResponse(response, "Invalid API Key");
+                writeErrorResponse(response, e.getMessage());
                 return;
             }
             // TODO consider adding ip address logging, create a custom AuthenticationToken
             var authToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            authToken.setDetails(new WebIpAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
             log.info("Authenticated API key for user: {}, with IP: {}", userDetails.getUsername(), ipAddress);
-
         }
 
         filterChain.doFilter(request, response);
