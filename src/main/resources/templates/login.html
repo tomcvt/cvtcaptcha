@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="login page">
-    <meta name="author" content="tomcvtdev">
+    <meta name="author" content="tomcvt">
     <title>Please sign in</title>
     <link href="/css/main.css" rel="stylesheet" />
 </head>
@@ -16,6 +16,8 @@
             <h2>Please sign in</h2>
             <div id="login-alert" class="alert alert-danger" role="alert" style="display: none;">Invalid credentials</div>
             <div id="logout-alert" class="alert alert-success" role="alert" style="display: none;">Successfully logged out</div>
+            <div id="activation-alert" class="alert alert-success" role="alert" style="display: none;">Account successfully activated. You can now log in.</div>
+            <div id="activation-error-alert" class="alert alert-danger" role="alert" style="display: none;">Account activation failed. Invalid or expired token.</div>
             <p>
                 <label for="username" class="screenreader">Username</label>
                 <input type="text" id="username" name="username" placeholder="Username" required autofocus>

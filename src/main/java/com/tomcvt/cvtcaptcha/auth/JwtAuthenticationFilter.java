@@ -58,9 +58,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String username = jwtService.extractUsername(token);
+        String username = null;
+        try {
+            username = jwtService.extractUsername(token);
+        } catch (Exception e) {
+            log.warn("Invalid JWT token: " + e.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        //JwtAuthentication overwrites api key authentication
+
+        if (username != null) {
             SecureUserDetails userDetails = (SecureUserDetails) secureUserDetailsService.loadUserByUsername(username);
             String xff = request.getHeader("X-Forwarded-For");
             String ipAddress;

@@ -6,6 +6,12 @@ if (urlParams.has('error')) {
 if (urlParams.has('logout')) {
     document.getElementById('logout-alert').style.display = 'block';
 }
+if (urlParams.has('activated')) {
+    document.getElementById('activation-alert').style.display = 'block';
+}
+if (urlParams.has('activationError')) {
+    document.getElementById('activation-error-alert').style.display = 'block';
+}
 
 document.getElementById('login-form').addEventListener('submit', async function (e) {
     e.preventDefault();
