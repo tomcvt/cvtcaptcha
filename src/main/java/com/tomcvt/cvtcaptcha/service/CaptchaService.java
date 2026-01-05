@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Cleanup;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +26,10 @@ public class CaptchaService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final int captchaExpirationMillis;
     private final String urlOrigin;
+    private final int maxQueueSize = 10000;
+
+    //image size about 10.03kB meaning we can 10k captcha safely 
+    // track and throw exceptions if limits are exceeded
 
     public CaptchaService(SolutionGenerator solutionGenerator,
             SolutionVerificationService solutionVerificationService,
@@ -45,6 +48,9 @@ public class CaptchaService {
     }
 
     public CaptchaData createCaptcha(UUID requestId, CaptchaType type, String userIp) {
+        if (captchaCleanupQueue.getQueueSize() >= maxQueueSize) {
+            throw new IllegalStateException("Captcha generation queue is full. Please try again later.");
+        }
         CaptchaData captchaData = new CaptchaData();
         requestId = captchaData.getRequestId();
         captchaData.setType(type);

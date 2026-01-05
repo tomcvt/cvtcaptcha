@@ -28,6 +28,9 @@ public class SecurityConfig {
         "/api/auth/**",
         "/error",
         "/public/**",
+        "/css/**",
+        "/js/**",
+        "/images/**",
     };
 
     public SecurityConfig(

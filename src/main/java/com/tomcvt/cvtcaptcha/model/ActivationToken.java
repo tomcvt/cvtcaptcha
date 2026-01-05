@@ -7,9 +7,9 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "activation_tokens", indexes = {
-    @Index(name = "idx_token", columnList = "token"),
-    @Index(name = "idx_expires_at", columnList = "expires_at"),
-    @Index(name = "idx_user_id", columnList = "user_id")
+    @Index(name = "idx_at_token", columnList = "token"),
+    @Index(name = "idx_at_expires_at", columnList = "expires_at"),
+    @Index(name = "idx_at_user_id", columnList = "user_id")
 })
 public class ActivationToken {
     @Id

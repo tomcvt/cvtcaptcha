@@ -39,4 +39,8 @@ public class CaptchaCleanupQueue {
         return pendingTasks;
     }
 
+    public int getQueueSize() {
+        return taskQueue.size();
+    }
+
 }

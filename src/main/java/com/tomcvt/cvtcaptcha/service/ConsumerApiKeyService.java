@@ -64,10 +64,6 @@ public class ConsumerApiKeyService {
      */
     public CachedUserDetails authenticate(String apiKey) throws AuthenticationException {
         String apiKeyHash = hmacHashService.hash(apiKey);
-        CachedUserDetails cachedUserDetails = apiKeyCache.get(apiKeyHash);
-        if (cachedUserDetails != null) {
-            return cachedUserDetails;
-        }
         var details = apiKeyCache.get(apiKeyHash);
         if (details != null) {
             if (!details.getApiKeyVersion().equals(currentVersion)) {
@@ -85,9 +81,9 @@ public class ConsumerApiKeyService {
         User user = apiKeyData.getUser();
         var limits = userLimitsService.getLimitsForUser(user);
         Integer dailyLimit = limits.getDailyCaptchaLimit();
-        cachedUserDetails = CachedUserDetails.fromUser(user, dailyLimit, apiKeyVersion);
-        apiKeyCache.put(apiKeyHash, cachedUserDetails);
-        return cachedUserDetails;
+        details = CachedUserDetails.fromUser(user, dailyLimit, apiKeyVersion);
+        apiKeyCache.put(apiKeyHash, details);
+        return details;
     }
 
     public ConsumerApiKeyResponse validateAndGetConsumerApiKeyData(String apiKey) {

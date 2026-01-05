@@ -7,6 +7,33 @@
     <link rel="stylesheet" href="/css/main.css" />
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <ul class="navbar-list">
+            <li class="navbar-item"><a href="/" class="navbar-link">Home</a></li>
+            <li class="navbar-item"><a href="/about" class="navbar-link">About</a></li>
+            <li class="navbar-item dropdown">
+                <a href="#" class="navbar-link">Profile</a>
+                <ul class="dropdown-menu">
+                    <li><a href="/user/dashboard" class="dropdown-link">Dashboard</a></li>
+                </ul>
+            </li>
+            <li class="navbar-item dropdown">
+                <a href="#" class="navbar-link">Management</a>
+                <ul class="dropdown-menu">
+                    <li><a href="/admin/dashboard" class="dropdown-link">Dashboard</a></li>
+                    <li><a href="/admin/logging" class="dropdown-link">Logging</a></li>
+                </ul>
+            </li>
+            <li class="navbar-item navbar-logout">
+                <form action="/logout" method="post" style="display:inline;">
+                    <button type="submit" class="navbar-link logout-btn">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+    <script>import('/js/navbar.js').then(m => m.Navbar.init());</script>
+    <!-- Navbar End -->
     <div class="content">
         <form id="registerForm" class="register-form">
             <h2>Register</h2>

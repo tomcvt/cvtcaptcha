@@ -28,4 +28,8 @@ public class HomeController {
         model.addAttribute("remainingRequests", rateLimiter.getRemainingRequests(userDetails.getIp()));
         return "home";
     }
+    @GetMapping("/about")
+    public String about() {
+        return "about";
+    }
 }

@@ -10,10 +10,10 @@ public class PasswordResetController {
     @GetMapping("/public/reset-password")
     public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
         model.addAttribute("token", token);
-        return "reset-password";
+        return "auth/reset-password";
     }
     @GetMapping("/public/recover-password")
     public String showRecoverPasswordForm() {
-        return "recover-password";
+        return "auth/recover-password";
     }
 }
