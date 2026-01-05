@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.tomcvt.cvtcaptcha.auth.AnonUserAuthenticationFilter;
 import com.tomcvt.cvtcaptcha.auth.ApiKeyAuthenticationFilter;
+import com.tomcvt.cvtcaptcha.auth.DefaultAccessDeniedHandler;
 import com.tomcvt.cvtcaptcha.auth.JwtAuthenticationFilter;
 
 @Configuration
@@ -25,7 +26,8 @@ public class SecurityConfig {
     private final AnonUserAuthenticationFilter anonUserAuthenticationFilter;
     private final String[] WHITELIST = {
         "/api/auth/**",
-        "/error"
+        "/error",
+        "/public/**",
     };
 
     public SecurityConfig(
@@ -53,7 +55,9 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(anonUserAuthenticationFilter, AnonymousAuthenticationFilter.class)
             .addFilterBefore(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class)
-            .anonymous(anonymous -> anonymous.disable());
+            .anonymous(anonymous -> anonymous.disable())
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedHandler(new DefaultAccessDeniedHandler()));
 
         return http.build();
     }

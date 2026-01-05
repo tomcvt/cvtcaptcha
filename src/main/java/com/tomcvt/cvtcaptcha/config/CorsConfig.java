@@ -29,10 +29,11 @@ public class CorsConfig {
         internal.addAllowedMethod("*");
         internal.addAllowedHeader("*");
         internal.setAllowCredentials(true);
-        source.registerCorsConfiguration("/api/internal/**", internal);
-        source.registerCorsConfiguration("/api/auth/**", internal);
-        source.registerCorsConfiguration("/login", internal);
-        source.registerCorsConfiguration("/logout", internal);
+        //source.registerCorsConfiguration("/api/internal/**", internal);
+        //source.registerCorsConfiguration("/api/auth/**", internal);
+        //source.registerCorsConfiguration("/login", internal);
+        //source.registerCorsConfiguration("/logout", internal);
+        source.registerCorsConfiguration("/**", internal);
 
         // 2) Public client CAPTCHA usage (no cookies)
         CorsConfiguration publicConf = new CorsConfiguration();

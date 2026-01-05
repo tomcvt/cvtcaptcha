@@ -24,8 +24,17 @@ public class RegistrationController {
         return "login?activationError";
     }
 
+    @GetMapping("/public/verify-email")
+    public String activateAccountHelper(@RequestParam String token) {
+        boolean activated = authService.activateAccount(token);
+        if (activated) {
+            return "redirect:/login?activated";
+        }
+        return "redirect:/login?activationError";
+    }
+
     @GetMapping("/register")
     public String showRegistrationForm() {
-        return "register";
+        return "registration";
     }
 }

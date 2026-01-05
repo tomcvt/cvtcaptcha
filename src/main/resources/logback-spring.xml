@@ -57,7 +57,9 @@
         <appender-ref ref="APP_FILE"/>
         <appender-ref ref="CONSOLE"/>
     </logger>
-
+    <!--o.s.s.a.m.AuthorizationManagerBeforeMethodInterceptor-->
+    <logger name="org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor" level="INFO" additivity="false"/>
+    
     <root level="INFO">
         <appender-ref ref="APP_FILE"/>
         <appender-ref ref="CONSOLE"/>

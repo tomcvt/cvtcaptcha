@@ -8,18 +8,23 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tomcvt.cvtcaptcha.auth.CachedUserDetails;
 import com.tomcvt.cvtcaptcha.model.ConsumerApiKeyData;
 import com.tomcvt.cvtcaptcha.model.User;
+import com.tomcvt.cvtcaptcha.model.UserLimits;
 import com.tomcvt.cvtcaptcha.repository.ConsumerApiKeyRepository;
+import com.tomcvt.cvtcaptcha.repository.UserLimitsRepository;
 import com.tomcvt.cvtcaptcha.repository.UserRepository;
 import com.tomcvt.cvtcaptcha.service.ApiKeyCache;
+import com.tomcvt.cvtcaptcha.service.ConsumerApiKeyService;
 import com.tomcvt.cvtcaptcha.service.HmacHashService;
 
 @Service
 public class SuperUserInitializer {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SuperUserInitializer.class);
     private final UserRepository userRepository;
+    private final UserLimitsRepository userLimitsRepository;
     private final PasswordEncoder passwordEncoder;
     private final HmacHashService hmacHashService;
     private final ConsumerApiKeyRepository consumerApiKeyRepository;
+    private final ConsumerApiKeyService consumerApiKeyService;
     private final ApiKeyCache apiKeyCache;
     private final String superUsername;
     private final String superPassword;
@@ -30,12 +35,15 @@ public class SuperUserInitializer {
         PasswordEncoder passwordEncoder,
         HmacHashService hmacHashService,
         ConsumerApiKeyRepository consumerApiKeyRepository,
+        ConsumerApiKeyService consumerApiKeyService,
+        UserLimitsRepository userLimitsRepository,
         ApiKeyCache apiKeyCache,
         @Value("${com.tomcvt.superuser.api-key}") String superuserApiKey,
         @Value("${com.tomcvt.superuser.username}") String superUsername,
         @Value("${com.tomcvt.superuser.password}") String superPassword,
         @Value("${com.tomcvt.superuser.api-key-version}") String superuserApiKeyVersion) {
         this.userRepository = userRepository;
+        this.userLimitsRepository = userLimitsRepository;
         this.superUsername = superUsername;
         this.superPassword = superPassword;
         this.passwordEncoder = passwordEncoder;
@@ -43,6 +51,7 @@ public class SuperUserInitializer {
         this.superuserApiKeyVersion = superuserApiKeyVersion;
         this.hmacHashService = hmacHashService;
         this.consumerApiKeyRepository = consumerApiKeyRepository;
+        this.consumerApiKeyService = consumerApiKeyService;
         this.apiKeyCache = apiKeyCache;
     }
 
@@ -76,22 +85,33 @@ public class SuperUserInitializer {
             superUser.setUsername(superUsername);
             String encodedPassword = passwordEncoder.encode(superPassword);
             superUser.setPassword(encodedPassword);
-            superUser.setEmail("");
+            superUser.setEmail("szalolony@gmail.com");
             superUser.setRole("SUPERUSER");
             superUser.setEnabled(true);
             superUser = userRepository.save(superUser);
             log.info("Superuser created successfully.");
         }
-        var keys = consumerApiKeyRepository.findByUserId(superUser.getId());
-        for (var key : keys) {
-            consumerApiKeyRepository.delete(key);
-            apiKeyCache.evict(key.getApiKeyHash());
+        consumerApiKeyService.deleteAllApiKeysForUser(superUserOpt.orElse(superUser));
+        var superUserLimits = userLimitsRepository.findByUserId(superUser.getId());
+        if (superUserLimits.isEmpty()) {
+            var limits = new UserLimits();
+            limits.setUser(superUser);
+            limits.setHourlyCaptchaLimit(10000);
+            limits.setDailyCaptchaLimit(50000);
+            userLimitsRepository.save(limits);
+            log.info("Superuser limits initialized.");
         }
-        ConsumerApiKeyData consumerApiKeyData = new ConsumerApiKeyData();
+        ConsumerApiKeyData consumerApiKeyData = new ConsumerApiKeyData(
+            superuserApiKey,
+            null,
+            superuserApiKeyVersion,
+            null,
+            "Superuser API Key",
+            "http://localhost"
+        );
         consumerApiKeyData.setUser(superUser);
         String apiKeyHash = hmacHashService.hash(superuserApiKey);
         consumerApiKeyData.setApiKeyHash(apiKeyHash);
-        consumerApiKeyData.setApiKeyVersion(superuserApiKeyVersion);
         consumerApiKeyData = consumerApiKeyRepository.save(consumerApiKeyData);
         var superuserCachedDetails = CachedUserDetails.fromUser(superUser, null, superuserApiKeyVersion);
         apiKeyCache.put(apiKeyHash, superuserCachedDetails);

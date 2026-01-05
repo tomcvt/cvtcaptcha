@@ -16,4 +16,8 @@ public interface UserLimitsRepository extends JpaRepository<UserLimits, Long> {
         SELECT ul FROM UserLimits ul WHERE ul.user = :user
             """)
     Optional<UserLimits> findByUser(@Param("user") User user);
+    @Query("""
+        SELECT ul FROM UserLimits ul WHERE ul.user.id = :userId
+    """)
+    Optional<UserLimits> findByUserId(@Param("userId") Long userId);
 }

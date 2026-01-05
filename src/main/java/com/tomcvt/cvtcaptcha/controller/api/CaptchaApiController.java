@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,55 +25,27 @@ import com.tomcvt.cvtcaptcha.exceptions.CaptchaLimitExceededException;
 import com.tomcvt.cvtcaptcha.exceptions.WrongTypeException;
 import com.tomcvt.cvtcaptcha.model.CaptchaData;
 import com.tomcvt.cvtcaptcha.network.CaptchaRateLimiter;
-import com.tomcvt.cvtcaptcha.network.UserRateLimiter;
 import com.tomcvt.cvtcaptcha.service.CaptchaService;
 import com.tomcvt.cvtcaptcha.service.CaptchaTokenService;
 
+import io.micrometer.core.ipc.http.HttpSender.Response;
 import jakarta.servlet.http.HttpServletRequest;
 
+@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPERUSER', 'TOMCVT')")
 @RestController
 @RequestMapping("/api/captcha")
 public class CaptchaApiController {
     private final CaptchaService captchaService;
     private final CaptchaRateLimiter captchaRateLimiter;
-    private final UserRateLimiter userRateLimiter;
     private final CaptchaTokenService captchaTokenService;
     private final List<String> limitedConsumers = List.of("ROLE_USER", "ROLE_ADMIN");
     private final List<String> unlimitedConsumers = List.of("ROLE_SUPERUSER", "ROLE_TOMCVT");
 
     public CaptchaApiController(CaptchaService captchaService, CaptchaRateLimiter captchaRateLimiter,
-            CaptchaTokenService captchaTokenService, UserRateLimiter userRateLimiter) {
+            CaptchaTokenService captchaTokenService) {
         this.captchaService = captchaService;
         this.captchaRateLimiter = captchaRateLimiter;
         this.captchaTokenService = captchaTokenService;
-        this.userRateLimiter = userRateLimiter;
-    }
-
-    private ResponseEntity<?> createCaptchaOld(SecureUserDetails userDetails, CaptchaRequest captchaRequest) {
-        CaptchaData captcha = null;
-        CaptchaType type = parseCaptchaType(captchaRequest.type());
-        if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ANON"))) {
-            // TODO change to anon rate limiter
-            captchaRateLimiter.checkAndIncrementAnonymousLimit(userDetails.getIp());
-            captcha = captchaService.createCaptcha(captchaRequest.requestId(), type,
-                    userDetails.getIp());
-        }
-        if (userDetails.getAuthorities().stream().anyMatch(auth -> limitedConsumers.contains(auth.getAuthority()))) {
-            userRateLimiter.checkAndIncrementUserCaptchaLimit(userDetails.getUser());
-            captcha = captchaService.createCaptcha(captchaRequest.requestId(), type,
-                    userDetails.getIp());
-        }
-        if (userDetails.getAuthorities().stream().anyMatch(auth -> unlimitedConsumers.contains(auth.getAuthority()))) {
-            captcha = captchaService.createCaptcha(captchaRequest.requestId(), type,
-                    userDetails.getIp());
-        }
-        if (captcha == null) {
-            throw new RuntimeException("Unable to create captcha for user");
-        }
-        CaptchaResponse response = new CaptchaResponse(
-                captcha.getRequestId(),
-                captcha.getData());
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/create")
@@ -82,7 +55,8 @@ public class CaptchaApiController {
             CachedUserDetails cud = (CachedUserDetails) userDetails;
             cud.useRequest();
         } catch (ClassCastException e) {
-            return createCaptchaOld((SecureUserDetails) userDetails, captchaRequest);
+            return ResponseEntity.status(500)
+                    .body(new ErrorResponse("AUTHENTICATION_ERROR", "Authenticate using an API key to access this endpoint"));
         } catch (CaptchaLimitExceededException e) {
             return ResponseEntity.status(429)
                     .body(new ErrorResponse("LIMIT_EXCEEDED", "No remaining requests available for this API key"));

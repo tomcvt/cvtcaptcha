@@ -31,16 +31,20 @@ form.addEventListener('submit', async function (e) {
 
         if (response.ok) {
             const res = await response.json();
-            // TODO END DOING THIS
+            result.innerText = res.message || 'Registration successful';
+            result.style.display = 'block';
+            result.classList.add('alert-success');
         } else {
             const err = await response.json();
             const errorText = err.message || 'Unknown error';
             result.innerText = 'Error: ' + errorText;
             result.style.display = 'block';
+            result.classList.add('alert-danger');
         }
     } catch (err) {
         result.innerText = 'Error: ' + err;
-        result.style = 'display: block;'
+        result.style.display = 'block';
+        result.classList.add('alert-danger');
     }
     submitButton.disabled = false;
 })

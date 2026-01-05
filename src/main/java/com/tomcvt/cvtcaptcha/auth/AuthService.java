@@ -88,8 +88,9 @@ public class AuthService {
             throw new IllegalArgumentException("Username already exists");
         }
         var existingUser = userRepository.findByEmail(email).orElse(null);
-        if (!existingUser.isEnabled()) {
+        if (existingUser != null && !existingUser.isEnabled()) {
             resendActivationToken(existingUser);
+            return existingUser;
         }
         validateUsername(username);
         validatePassword(rawPassword);
@@ -142,6 +143,15 @@ public class AuthService {
         }
     }
     @Transactional
+    public void changePassword(User user, PassPayload passPayload) {
+        String oldRawPassword = passPayload.oldPassword();
+        String newRawPassword = passPayload.newPassword();
+        if(!passwordEncoder.matches(oldRawPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Old password does not match");
+        }
+        changePassword(user, newRawPassword);
+    }
+    @Transactional
     public void changePassword(Long userId, PassPayload passPayload) {
         String oldRawPassword = passPayload.oldPassword();
         String newRawPassword = passPayload.newPassword();
@@ -155,6 +165,9 @@ public class AuthService {
 
     @Transactional
     public void changePassword(User user, String newRawPassword) {
+        if (user.getRole().equals("SUPERUSER")) {
+            throw new IllegalArgumentException("Cannot change password for SUPERUSER via this method");
+        }
         validatePassword(newRawPassword);
         user.setPassword(passwordEncoder.encode(newRawPassword));
         userRepository.save(user);

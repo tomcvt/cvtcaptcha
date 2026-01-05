@@ -1,12 +1,11 @@
 package com.tomcvt.cvtcaptcha.dtos;
 
-public record ConsumerApiKeyResponse(
+public record ApiKeyDetailsDto(
     String apiKey,
-    String username,
-    String domainUrl,
     String name,
+    String domainUrl,
     String version,
-    boolean revoked
+    Integer remainingRequests
 ) {
     
 }

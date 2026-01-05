@@ -1,17 +1,21 @@
 package com.tomcvt.cvtcaptcha.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tomcvt.cvtcaptcha.auth.CachedUserDetails;
-import com.tomcvt.cvtcaptcha.auth.SecureUserDetails;
+import com.tomcvt.cvtcaptcha.dtos.ApiKeyDetailsDto;
 import com.tomcvt.cvtcaptcha.dtos.ConsumerApiKeyResponse;
+import com.tomcvt.cvtcaptcha.dtos.UserLimitsInfo;
 import com.tomcvt.cvtcaptcha.exceptions.ExpiredApiKeyException;
 import com.tomcvt.cvtcaptcha.exceptions.InvalidApiKeyException;
 import com.tomcvt.cvtcaptcha.model.ConsumerApiKeyData;
 import com.tomcvt.cvtcaptcha.model.User;
+import com.tomcvt.cvtcaptcha.model.UserLimits;
 import com.tomcvt.cvtcaptcha.repository.ConsumerApiKeyRepository;
 import com.tomcvt.cvtcaptcha.repository.UserRepository;
 import com.tomcvt.cvtcaptcha.utility.ApiKeyGeneratorUtil;
@@ -24,12 +28,14 @@ public class ConsumerApiKeyService {
     private final UserRepository userRepository;
     private final ApiKeyCache apiKeyCache;
     private final String currentVersion;
+    private final UserLimitsService userLimitsService;
 
     public ConsumerApiKeyService(
             HmacHashService hmacHashService,
             ConsumerApiKeyRepository consumerApiKeyRepository,
             UserRepository userRepository,
             ApiKeyCache apiKeyCache,
+            UserLimitsService userLimitsService,
             @Value("${com.tomcvt.hmac-hash-service.api-key-version}") String currentVersion) {
         this.hmacHashService = hmacHashService;
         this.apiKeyGeneratorUtil = new ApiKeyGeneratorUtil();
@@ -37,6 +43,7 @@ public class ConsumerApiKeyService {
         this.userRepository = userRepository;
         this.apiKeyCache = apiKeyCache;
         this.currentVersion = currentVersion;
+        this.userLimitsService = userLimitsService;
     }
 
     // TODO cache api keys
@@ -76,7 +83,9 @@ public class ConsumerApiKeyService {
         }
         // TODO make sure to use proper limits from user later, 500 for now
         User user = apiKeyData.getUser();
-        cachedUserDetails = CachedUserDetails.fromUser(user, 500, apiKeyVersion);
+        var limits = userLimitsService.getLimitsForUser(user);
+        Integer dailyLimit = limits.getDailyCaptchaLimit();
+        cachedUserDetails = CachedUserDetails.fromUser(user, dailyLimit, apiKeyVersion);
         apiKeyCache.put(apiKeyHash, cachedUserDetails);
         return cachedUserDetails;
     }
@@ -84,6 +93,25 @@ public class ConsumerApiKeyService {
     public ConsumerApiKeyResponse validateAndGetConsumerApiKeyData(String apiKey) {
         String apiKeyHash = hmacHashService.hash(apiKey);
         return getConsumerApiKeyData(apiKeyHash);
+    }
+
+    public UserLimitsInfo getUserLimitsInfoByUser(User user) {
+        var limits = userLimitsService.getLimitsForUser(user);
+        var cachedDetails = apiKeyCache.getByUserId(user.getId());
+        if (cachedDetails == null) {
+            return new UserLimitsInfo(
+                limits.getHourlyCaptchaLimit(),
+                limits.getDailyCaptchaLimit(),
+                "UNUSED"
+            );
+        }
+        Integer dailyRemaining = cachedDetails.getRemainingRequests();
+        String dailyRemainingStr = dailyRemaining != null ? dailyRemaining.toString() : "INFINITE";
+        return new UserLimitsInfo(
+            limits.getHourlyCaptchaLimit(),
+            limits.getDailyCaptchaLimit(),
+            dailyRemainingStr
+        );
     }
 
     public ConsumerApiKeyResponse getConsumerApiKeyData(String apiKeyHash) {
@@ -94,7 +122,37 @@ public class ConsumerApiKeyService {
                 apiKeyData.getLabel(),
                 apiKeyData.getUser().getUsername(),
                 apiKeyData.getDomainUrl(),
-                apiKeyData.getName());
+                apiKeyData.getName(),
+                apiKeyData.getApiKeyVersion(),
+                apiKeyData.isRevoked()
+        );
+    }
+    public List<ConsumerApiKeyResponse> getAllApiKeysForUser(User user) {
+        List<ConsumerApiKeyData> apiKeys = consumerApiKeyRepository.findAllByUser(user);
+        return apiKeys.stream()
+                .map(apiKeyData -> new ConsumerApiKeyResponse(
+                        apiKeyData.getLabel(),
+                        apiKeyData.getUser().getUsername(),
+                        apiKeyData.getDomainUrl(),
+                        apiKeyData.getName(),
+                        apiKeyData.getApiKeyVersion(),
+                        apiKeyData.isRevoked()
+                ))
+                .toList();
+    }
+
+    public List<ConsumerApiKeyResponse> getAllActiveApiKeysForUser(User user) {
+        List<ConsumerApiKeyData> apiKeys = consumerApiKeyRepository.findAllActiveByUser(user);
+        return apiKeys.stream()
+                .map(apiKeyData -> new ConsumerApiKeyResponse(
+                        apiKeyData.getLabel(),
+                        apiKeyData.getUser().getUsername(),
+                        apiKeyData.getDomainUrl(),
+                        apiKeyData.getName(),
+                        apiKeyData.getApiKeyVersion(),
+                        apiKeyData.isRevoked()
+                ))
+                .toList();
     }
 
     public ConsumerApiKeyResponse createConsumerApiKey(String username, String domainUrl, String name) {
@@ -122,7 +180,30 @@ public class ConsumerApiKeyService {
                 apiKey,
                 user.getUsername(),
                 domainUrl,
-                name);
+                name,
+                currentVersion,
+                false);
+    }
+
+    @Transactional
+    public void revokeAllApiKeysForUser(User user) {
+        List<ConsumerApiKeyData> apiKeys = consumerApiKeyRepository.findAllActiveByUser(user);
+        for (var apiKey : apiKeys) {
+            apiKey.setRevoked(true);
+            consumerApiKeyRepository.save(apiKey);
+            apiKeyCache.evictHash(apiKey.getApiKeyHash());
+        }
+        apiKeyCache.evictUserDetailsByUserId(user.getId());
+    }
+
+    @Transactional
+    public void deleteAllApiKeysForUser(User user) {
+        List<ConsumerApiKeyData> apiKeys = consumerApiKeyRepository.findAllByUser(user);
+        for (var apiKey : apiKeys) {
+            consumerApiKeyRepository.delete(apiKey);
+            apiKeyCache.evictHash(apiKey.getApiKeyHash());
+        }
+        apiKeyCache.evictUserDetailsByUserId(user.getId());
     }
 
     private String createLabelForApiKey(String key) {

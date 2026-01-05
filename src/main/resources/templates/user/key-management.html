@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Key Management Dashboard</title>
+	<link rel="stylesheet" href="/css/main.css">
+	<link rel="stylesheet" href="/css/key-management.css">
+</head>
+
+<body>
+	<div class="key-dashboard">
+		<div class="key-dashboard-header">
+			<div class="limits-card" id="user-limits">
+				<div class="limits-title">Your Usage Limits</div>
+				<div class="limits-row"><span>Hourly Limit:</span> <span id="hourlyLimit">...</span></div>
+				<div class="limits-row"><span>Daily Limit:</span> <span id="dailyLimit">...</span></div>
+				<div class="limits-row"><span>Daily Remaining:</span> <span id="dailyRemaining">...</span></div>
+			</div>
+			<div class="header-actions">
+				<button class="btn btn-small btn-secondary" id="openChangePasswordModal">Change password</button>
+				<button class="btn btn-primary api-key-btn" id="openCreateModal">Generate API Key</button>
+			</div>
+		</div>
+		<div class="key-list" id="keyList">
+			<!-- API keys will be populated here -->
+		</div>
+	</div>
+
+	<!-- Modal for API Key Creation -->
+	<div class="modal" id="createKeyModal">
+		<div class="modal-content">
+			<button class="modal-close" id="closeModal" title="Close">&times;</button>
+			<h2>Create API Key</h2>
+			<form id="createKeyForm" class="default-form">
+				<input type="text" id="modalDomainUrl" name="domainUrl" placeholder="Domain URL" required minlength="3"
+					maxlength="100">
+				<input type="text" id="modalName" name="name" placeholder="Key Name" required minlength="3"
+					maxlength="50">
+				<button type="submit" class="btn btn-primary wide">Create</button>
+			</form>
+			<div class="api-key-result" id="apiKeyResult" style="display:none;">
+				<label for="apiKeyField">Your API Key:</label>
+				<div class="api-key-field">
+					<input type="text" id="apiKeyField" class="api-key-input" readonly>
+					<button class="copy-btn" id="copyApiKeyBtn">Copy</button>
+				</div>
+				<div id="apiKeyMeta"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal for Change Password -->
+	<div class="modal" id="changePasswordModal">
+		<div class="modal-content">
+			<button class="modal-close" id="closeChangePasswordModal" title="Close">&times;</button>
+			<h2>Change Password</h2>
+			<form id="changePasswordForm" class="default-form">
+				<input type="password" id="oldPassword" name="oldPassword" placeholder="Old Password" required
+					minlength="6">
+				<input type="password" id="newPassword" name="newPassword" placeholder="New Password" required
+					minlength="6">
+				<input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm New Password"
+					required minlength="6">
+				<button type="submit" class="btn btn-secondary wide">Change</button>
+			</form>
+			<div class="api-key-result" id="changePasswordResult" style="display:none;"></div>
+		</div>
+	</div>
+
+	<script>
+
+		// Fetch and display user limits
+		function loadUserLimits() {
+			fetch('/api/user/limits')
+				.then(r => r.json())
+				.then(data => {
+					document.getElementById('hourlyLimit').textContent = data.hourlyCaptchaLimit ?? '...';
+					document.getElementById('dailyLimit').textContent = data.dailyCaptchaLimit ?? '...';
+					document.getElementById('dailyRemaining').textContent = data.dailyRemainingCaptchaLimit ?? '...';
+				});
+		}
+
+		// Fetch and display API keys
+		function loadApiKeys() {
+			fetch('/api/user/api-keys/list')
+				.then(r => r.json())
+				.then(keys => {
+					const keyList = document.getElementById('keyList');
+					keyList.innerHTML = '';
+					if (!Array.isArray(keys) || keys.length === 0) {
+						keyList.innerHTML = '<div class="center">No API keys found.</div>';
+						return;
+					}
+					keys.forEach((key, idx) => {
+						const row = document.createElement('div');
+						row.className = 'key-row';
+						row.innerHTML = `
+						<div class="key-row-main">
+							<span class="key-label">${key.apiKey}</span>
+						</div>
+						<div class="key-row-info">
+							<span class="key-name">${key.name}</span>
+							<span class="key-version">v${key.version}</span>
+							<span class="key-status ${key.revoked ? 'revoked' : 'active'}">${key.revoked ? 'Revoked' : 'Active'}</span>
+							<button class="btn btn-small btn-revoke" data-key-idx="${idx}">Revoke</button>
+						</div>
+					`;
+						// Attach revoke event
+						setTimeout(() => {
+							row.querySelector('.btn-revoke').onclick = function () {
+								// Placeholder for revoke logic
+								alert('Revoke endpoint not implemented yet.');
+							};
+						}, 0);
+						keyList.appendChild(row);
+					});
+				});
+		}
+
+		// Modal logic
+		const modal = document.getElementById('createKeyModal');
+		document.getElementById('openCreateModal').onclick = () => {
+			modal.classList.add('open');
+			document.getElementById('createKeyForm').style.display = '';
+			document.getElementById('apiKeyResult').style.display = 'none';
+			document.getElementById('createKeyForm').reset();
+		};
+		document.getElementById('closeModal').onclick = () => {
+			modal.classList.remove('open');
+		};
+		window.onclick = function (event) {
+			//if (event.target === modal) modal.classList.remove('open');
+			if (event.target === changePasswordModal) changePasswordModal.classList.remove('open');
+		};
+
+		// Handle API key creation
+		document.getElementById('createKeyForm').onsubmit = function (e) {
+			e.preventDefault();
+			const domainUrl = document.getElementById('modalDomainUrl').value;
+			const name = document.getElementById('modalName').value;
+			fetch('/api/user/api-keys/create', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ domainUrl, name })
+			})
+				.then(r => r.json())
+				.then(data => {
+					if (data.apiKey) {
+						document.getElementById('createKeyForm').style.display = 'none';
+						document.getElementById('apiKeyResult').style.display = '';
+						document.getElementById('apiKeyField').value = data.apiKey;
+						document.getElementById('apiKeyMeta').innerHTML = `
+					<div><strong>Name:</strong> ${data.name}</div>
+					<div><strong>Version:</strong> v${data.version}</div>
+					<div><strong>Status:</strong> <span class="key-status ${data.revoked ? 'revoked' : 'active'}">${data.revoked ? 'Revoked' : 'Active'}</span></div>
+				`;
+						loadApiKeys();
+					} else {
+						document.getElementById('apiKeyResult').innerHTML = '<div class="alert alert-error">Error: ' + (data.message || 'Failed to create key') + '</div>';
+						document.getElementById('apiKeyResult').style.display = '';
+					}
+				});
+		};
+
+		// Copy API key to clipboard
+		document.getElementById('copyApiKeyBtn').onclick = function () {
+			const apiKeyInput = document.getElementById('apiKeyField');
+			apiKeyInput.select();
+			apiKeyInput.setSelectionRange(0, 99999);
+			document.execCommand('copy');
+			this.textContent = 'Copied!';
+			setTimeout(() => { this.textContent = 'Copy'; }, 1200);
+		};
+
+		// Modal logic for change password
+		const changePasswordModal = document.getElementById('changePasswordModal');
+		document.getElementById('openChangePasswordModal').onclick = () => {
+			changePasswordModal.classList.add('open');
+			document.getElementById('changePasswordForm').style.display = '';
+			document.getElementById('changePasswordResult').style.display = 'none';
+			document.getElementById('changePasswordForm').reset();
+		};
+		document.getElementById('closeChangePasswordModal').onclick = () => {
+			changePasswordModal.classList.remove('open');
+		};
+
+		// Handle password change
+		document.getElementById('changePasswordForm').onsubmit = function (e) {
+			e.preventDefault();
+			const oldPassword = document.getElementById('oldPassword').value;
+			const newPassword = document.getElementById('newPassword').value;
+			const confirmPassword = document.getElementById('confirmPassword').value;
+			const resultDiv = document.getElementById('changePasswordResult');
+			if (newPassword !== confirmPassword) {
+				resultDiv.innerHTML = '<div class="alert alert-error">New passwords do not match.</div>';
+				resultDiv.style.display = '';
+				return;
+			}
+			fetch('/api/user/change-password', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ oldPassword, newPassword })
+			})
+				.then(r => r.json())
+				.then(data => {
+					if (data.text) {
+						resultDiv.innerHTML = '<div class="alert alert-success">' + data.text + '</div>';
+						resultDiv.style.display = '';
+						document.getElementById('changePasswordForm').style.display = 'none';
+					} else {
+						resultDiv.innerHTML = '<div class="alert alert-error">' + (data.message || 'Failed to change password') + '</div>';
+						resultDiv.style.display = '';
+					}
+				});
+		};
+
+		// Initial load
+		loadUserLimits();
+		loadApiKeys();
+	</script>
+</body>
+
+</html>

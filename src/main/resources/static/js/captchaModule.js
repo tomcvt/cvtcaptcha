@@ -64,7 +64,8 @@ const CaptchaModule = {
                 body: JSON.stringify({ requestId: requestId, type: config.type, solution: solution })
             });
             if (!response.ok) {
-                console.log(await response.text());
+                const err = await response.json();
+                console.log(err.error + ': ' + err.message);
                 return false;
             }
             const result = await response.json();
@@ -155,8 +156,7 @@ const CaptchaModule = {
                 }
                 //Render captcha based on type
                 if (config.type === 'CLICK_IN_ORDER') {
-                    //For now log the solution
-                    console.log('Captcha Solution (for testing):', captchaData.imageUrl);
+                    //console.log('Captcha Solution (for testing):', captchaData.imageUrl);
                     img.src = captchaData.imageUrl;
                     imgWrapper.appendChild(img);
                     moduleBox.appendChild(imgWrapper);

@@ -26,9 +26,10 @@
                 <label for="confirmPassword" class="screenreader">Confirm Password</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required />
             </p>
-            <div id="result" class="alert alert-danger" role="alert" style="display: none;">Invalid password</div>
+            <div id="result" class="alert" role="alert" style="display: none;">Invalid password</div>
             <div id="result-redirect" class="alert alert-success" role="alert" style="display: none;">Success</div>
             <button id="submit-button" type="submit" class="btn btn-primary">Register</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Login</button>
         </form>
     </div>
     <script src="/js/registration.js"></script>

@@ -3,7 +3,9 @@ package com.tomcvt.cvtcaptcha.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "user_limits")
+@Table(name = "user_limits", indexes = {
+    @Index(name = "idx_user_limits_user_id", columnList = "user_id")
+})
 public class UserLimits {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,8 +15,6 @@ public class UserLimits {
     private User user;
     private Integer hourlyCaptchaLimit;
     private Integer dailyCaptchaLimit;
-    private Integer hourlyRequestLimit;
-    private Integer dailyRequestLimit;
 
     public UserLimits() {
     }
@@ -43,17 +43,4 @@ public class UserLimits {
     public void setDailyCaptchaLimit(Integer dailyCaptchaLimit) {
         this.dailyCaptchaLimit = dailyCaptchaLimit;
     }
-    public Integer getHourlyRequestLimit() {
-        return hourlyRequestLimit;
-    }
-    public void setHourlyRequestLimit(Integer hourlyRequestLimit) {
-        this.hourlyRequestLimit = hourlyRequestLimit;
-    }
-    public Integer getDailyRequestLimit() {
-        return dailyRequestLimit;
-    }
-    public void setDailyRequestLimit(Integer dailyRequestLimit) {
-        this.dailyRequestLimit = dailyRequestLimit;
-    }
-
 }

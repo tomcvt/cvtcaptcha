@@ -18,9 +18,9 @@ import com.tomcvt.cvtcaptcha.enums.CaptchaType;
 import com.tomcvt.cvtcaptcha.exceptions.WrongTypeException;
 import com.tomcvt.cvtcaptcha.model.CaptchaData;
 import com.tomcvt.cvtcaptcha.network.CaptchaRateLimiter;
-import com.tomcvt.cvtcaptcha.network.UserRateLimiter;
 import com.tomcvt.cvtcaptcha.service.CaptchaService;
 import com.tomcvt.cvtcaptcha.service.CaptchaTokenService;
+import com.tomcvt.cvtcaptcha.service.InternalUserLimiter;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -29,13 +29,13 @@ import jakarta.servlet.http.HttpServletRequest;
 public class InternalApiController {
     private final CaptchaService captchaService;
     private final CaptchaRateLimiter captchaRateLimiter;
-    private final UserRateLimiter userRateLimiter;
     private final CaptchaTokenService captchaTokenService;
+    private final InternalUserLimiter userRateLimiter;
     private final List<String> limitedConsumers = List.of("ROLE_USER", "ROLE_ADMIN");
     private final List<String> unlimitedConsumers = List.of("ROLE_SUPERUSER", "ROLE_TOMCVT");
 
     public InternalApiController(CaptchaService captchaService, CaptchaRateLimiter captchaRateLimiter, 
-                                CaptchaTokenService captchaTokenService, UserRateLimiter userRateLimiter
+                                CaptchaTokenService captchaTokenService, InternalUserLimiter userRateLimiter
     ) {
         this.captchaService = captchaService;
         this.captchaRateLimiter = captchaRateLimiter;

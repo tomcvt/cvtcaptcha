@@ -51,4 +51,6 @@ public class AuthApiController {
         authService.registerUserWithEmail(request.username(), request.rawPassword(), request.email(), "USER");
         return ResponseEntity.ok(new TextResponse("Registration successful. Please check your email to activate your account."));
     }
+
+    
 }

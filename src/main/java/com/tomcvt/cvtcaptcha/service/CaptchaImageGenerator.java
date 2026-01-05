@@ -8,7 +8,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.ImageOutputStream;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,12 +23,13 @@ import com.tomcvt.cvtcaptcha.utility.SolutionParser;
 
 @Service
 public class CaptchaImageGenerator {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CaptchaImageGenerator.class);
     private final String captchaDir;
     private final Random random = new Random();
     private final EmojiProvider emojiProvider;
     private final String emojiPath = "/emoji-noto-color/72/";
-    private final int imageWidth; //default 400
-    private final int imageHeight; //default 300
+    private final int imageWidth; // default 400
+    private final int imageHeight; // default 300
 
     public CaptchaImageGenerator(@Value("${app.captcha-dir}") String captchaDir,
             @Value("${app.image.width}") int imageWidth,
@@ -59,9 +65,10 @@ public class CaptchaImageGenerator {
             try {
                 BufferedImage emojiImage = ImageIO.read(emojiStream);
                 g2d.drawImage(emojiImage, -emojiImage.getWidth() / 2, -emojiImage.getHeight() / 2, null);
-                //g2d.setColor(Color.RED);
-                //g2d.drawOval(-emojiImage.getWidth() / 2, -emojiImage.getHeight() / 2, 72, 72);
-                //g2d.drawRect(0,0,1,1);
+                // g2d.setColor(Color.RED);
+                // g2d.drawOval(-emojiImage.getWidth() / 2, -emojiImage.getHeight() / 2, 72,
+                // 72);
+                // g2d.drawRect(0,0,1,1);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -77,7 +84,7 @@ public class CaptchaImageGenerator {
                     .getResourceAsStream(emojiPath + "emoji_u" + emoji + ".png");
             try {
                 BufferedImage emojiImage = ImageIO.read(emojiStream);
-                //AffineTransform scaleTransform = AffineTransform.getScaleInstance(0.5, 0.5);
+                // AffineTransform scaleTransform = AffineTransform.getScaleInstance(0.5, 0.5);
                 Image sei = emojiImage.getScaledInstance(
                         (int) (emojiImage.getWidth() * 0.5),
                         (int) (emojiImage.getHeight() * 0.5),
@@ -88,7 +95,6 @@ public class CaptchaImageGenerator {
                 e.printStackTrace();
             }
         }
-
         g2d.dispose();
 
         try {
@@ -96,8 +102,29 @@ public class CaptchaImageGenerator {
             if (!outputDir.exists()) {
                 outputDir.mkdirs();
             }
-            File outputFile = new File(outputDir, "captcha_" + requestId + ".png");
-            ImageIO.write(image, "png", outputFile);
+            File outputFile = new File(outputDir, "captcha_" + requestId + ".jpg");
+            // Convert to RGB (JPEG does not support alpha)
+            BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = rgbImage.createGraphics();
+            g.drawImage(image, 0, 0, Color.BLACK, null);
+            g.dispose();
+
+            // Set JPEG compression
+            ImageWriter jpgWriter = ImageIO.getImageWritersByFormatName("jpg").next();
+            ImageOutputStream ios = ImageIO.createImageOutputStream(outputFile);
+            jpgWriter.setOutput(ios);
+
+            JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(
+                    null);
+            jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            jpegParams.setCompressionQuality(0.7f);
+
+            jpgWriter.write(null, new IIOImage(rgbImage, null, null), jpegParams);
+            ios.close();
+            jpgWriter.dispose();
+            long fileSize = outputFile.length();
+            String fileSizeKB = String.format("%.2f", fileSize / 1024.0);
+            log.info("Generated CAPTCHA image: {} ({} KB)", outputFile.getAbsolutePath(), fileSizeKB);
             return outputFile;
         } catch (Exception e) {
             e.printStackTrace();

@@ -23,6 +23,20 @@ spring:
       web:
         exposure:
           include: health,info
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    test-connection: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 
 server:
   port: ${SERVER_PORT}
@@ -37,18 +51,18 @@ com:
         time-window-ms: 600000 # 10 minutes
         ban-rate-per-minute: 90
         ban-duration-ms: 7200000 # 2 hours
-      default-user-limit:
-        hourly-max-requests: 60000
-        daily-max-requests: 600000
       ip-registry-cleaner:
         interval-ms: 600000 # 10 minutes
     captcha:
       anon-rate-limit:
         max-requests: 20
         time-window-ms: 3600000
+      user-internal-api:
+        max-requests: 100
+        time-window-ms: 3600000 # 1 hour
       default-user-limit:
-        hourly-max-requests: 1000
-        daily-max-requests: 10000
+        hourly: 1000
+        daily: 3600
       expiration-ms: 300000 # 5 minutes
       max-attempts: 3
     jwt:
