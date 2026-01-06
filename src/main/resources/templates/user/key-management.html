@@ -136,12 +136,25 @@
 						// Attach revoke event
 						setTimeout(() => {
 							row.querySelector('.btn-revoke').onclick = function () {
-								// Placeholder for revoke logic
-								alert('Revoke endpoint not implemented yet.');
+								const keyName = key.name;
+								revokeApiKey(keyName);
 							};
 						}, 0);
 						keyList.appendChild(row);
 					});
+				});
+		}
+
+		function revokeApiKey(name) {
+			fetch('/api/user/api-keys/revoke', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name })
+			})
+				.then(r => r.json())
+				.then(data => {
+					alert(data.message || 'API key revoked successfully');
+					loadApiKeys();
 				});
 		}
 

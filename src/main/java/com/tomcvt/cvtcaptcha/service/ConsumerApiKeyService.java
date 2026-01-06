@@ -77,6 +77,9 @@ public class ConsumerApiKeyService {
         if (apiKeyVersion == null || !apiKeyVersion.equals(currentVersion)) {
             throw new ExpiredApiKeyException("Outdated API Key, please create a new one");
         }
+        if (apiKeyData.isRevoked()) {
+            throw new InvalidApiKeyException("API Key has been revoked");
+        }
         // TODO make sure to use proper limits from user later, 500 for now
         User user = apiKeyData.getUser();
         var limits = userLimitsService.getLimitsForUser(user);
@@ -159,15 +162,20 @@ public class ConsumerApiKeyService {
 
     @Transactional
     public ConsumerApiKeyResponse createConsumerApiKey(User user, String domainUrl, String name) {
+        var existing = consumerApiKeyRepository.findByUserAndName(user, name);
+        if (existing.isPresent()) {
+            throw new IllegalArgumentException("API Key with the same name already exists for this user");
+        }
         String apiKey = apiKeyGeneratorUtil.generateApiKey();
         String apiKeyHash = hmacHashService.hash(apiKey);
-        ConsumerApiKeyData apiKeyData = new ConsumerApiKeyData();
-        apiKeyData.setUser(user);
-        apiKeyData.setDomainUrl(domainUrl);
-        apiKeyData.setName(name);
-        apiKeyData.setApiKeyHash(apiKeyHash);
-        apiKeyData.setApiKeyVersion(currentVersion);
-        apiKeyData.setLabel(createLabelForApiKey(apiKey));
+        ConsumerApiKeyData apiKeyData = new ConsumerApiKeyData(
+            apiKey,
+            apiKeyHash,
+            currentVersion,
+            user,
+            name,
+            domainUrl
+        );
         apiKeyData = consumerApiKeyRepository.save(apiKeyData);
         //TODO add proper user limits later, 500 for now
         var cachedDetails = CachedUserDetails.fromUser(user, 500, currentVersion);
@@ -179,6 +187,16 @@ public class ConsumerApiKeyService {
                 name,
                 currentVersion,
                 false);
+    }
+
+    @Transactional
+    public void revokeApiKey(User user, String name) {
+        ConsumerApiKeyData apiKeyData = consumerApiKeyRepository.findByUserAndName(user, name)
+                .orElseThrow(() -> new IllegalArgumentException("API Key not found for user: " + user.getUsername()));
+        apiKeyData.setRevoked(true);
+        consumerApiKeyRepository.save(apiKeyData);
+        apiKeyCache.evictHash(apiKeyData.getApiKeyHash());
+        
     }
 
     @Transactional

@@ -22,4 +22,5 @@ public interface ConsumerApiKeyRepository extends JpaRepository<ConsumerApiKeyDa
         WHERE c.user = :user AND c.revoked = false
     """)
     List<ConsumerApiKeyData> findAllActiveByUser(@Param("user") User user);
+    Optional<ConsumerApiKeyData> findByUserAndName(User user, String name);
 }

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.tomcvt</groupId>
 	<artifactId>cvtcaptcha</artifactId>
-	<version>0.0.6</version>
+	<version>0.0.7</version>
 	<name>cvtcaptcha</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>

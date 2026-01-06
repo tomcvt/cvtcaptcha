@@ -65,6 +65,13 @@ public class UserApiController {
         List<ConsumerApiKeyResponse> apiKeys = consumerApiKeyService.getAllApiKeysForUser(cas.getUser());
         return ResponseEntity.ok(apiKeys);
     }
+    @PostMapping("/api-keys/revoke")
+    public ResponseEntity<?> revokeApiKey(@AuthenticationPrincipal UserDetails userDetails, @RequestBody ApiKeyRequest request) {
+        SecureUserDetails cas = getSecureUserDetails(userDetails);
+        consumerApiKeyService.revokeApiKey(cas.getUser(), request.name());
+        log.info("API key '{}' revoked for user: {}", request.name(), cas.getUser().getUsername());
+        return ResponseEntity.ok(new TextResponse("API key revoked successfully"));
+    }
 
     @GetMapping("/limits")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
