@@ -41,7 +41,7 @@ public class CaptchaTokenService {
             .compact();
     }
 
-    public String validateCaptchaToken(String token) {
+    public String validateCaptchaToken(String token) throws InvalidTokenException {
         var claims = parseToken(token);
         var expiration = claims.getPayload().getExpiration();
         if (expiration.before(new Date())) {
@@ -51,7 +51,7 @@ public class CaptchaTokenService {
     }
 
 
-    private Jws<Claims> parseToken(String token) {
+    private Jws<Claims> parseToken(String token) throws InvalidTokenException {
         try {
             return jwtParser.parseSignedClaims(token);
         } catch (Exception e) {

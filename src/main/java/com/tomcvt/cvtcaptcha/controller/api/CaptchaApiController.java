@@ -95,10 +95,15 @@ public class CaptchaApiController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponse("MISSING_TOKEN", "Captcha token is required for verification."));
         }
-        UUID requestId = UUID.fromString(captchaTokenService.validateCaptchaToken(token));
+        UUID requestId;
+        try {
+            String requestIdStr = captchaTokenService.validateCaptchaToken(token);
+            requestId = UUID.fromString(requestIdStr);
+        } catch (Exception e) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponse("INVALID_TOKEN", e.getMessage()));
+        }
         var response = new VerificationResponse(requestId, true);
-        // error throwed returns 401 and error json
-        // TODO decide on what o return
         return ResponseEntity.ok().body(response);
     }
 

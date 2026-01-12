@@ -79,7 +79,7 @@ public class SuperUserInitializer {
             superUser.setPassword(encodedPassword);
             userRepository.save(superUser);
         }
-        User superUser = null;
+        User superUser = superUserOpt.orElse(null);
         if (superUserOpt.isEmpty()) {
             superUser = new User();
             superUser.setUsername(superUsername);

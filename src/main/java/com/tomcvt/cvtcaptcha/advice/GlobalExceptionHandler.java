@@ -77,17 +77,7 @@ public class GlobalExceptionHandler {
         log.warn("IllegalArgumentException: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ErrorResponse("ILLEGAL_ARGUMENT", ex.getMessage()));
-    }/*
-      * @ExceptionHandler(AuthorizationDeniedException.class)
-      * public ResponseEntity<ErrorResponse>
-      * handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
-      * log.warn("AuthorizationDeniedException: " + ex.getMessage());
-      * return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-      * new ErrorResponse("AUTHORIZATION_DENIED", "Authorization denied")
-      * );
-      * }
-      */
-
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Unhandled exception: ", ex);
